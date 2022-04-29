@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URI")
+}
+
+model Translation {
+  id               Int      @id @default(autoincrement())
+  translationDef   String
+  lang String
+  word Word @relation(fields: [wordId], references: [id])
+  wordId Int @unique
+}
+
+model Word {
+  id        Int     @id @default(autoincrement())
+  wordDef   String
+  desc      String?
+  translation Translation?
+}
