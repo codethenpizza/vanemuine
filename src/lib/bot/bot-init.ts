@@ -1,11 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import {config} from "../config";
 
-// const IS_PRODUCTION = process.env.PRODUCTION;
-// const TOKEN = process.env.BOT_TOKEN;
-// const PORT = process.env.PORT || 433;
-// const URL = process.env.APP_URL || 'https://myworkbot.herokuapp.com ';
-
 const {url, port, token} = config.bot
 
 type botOptions = {
