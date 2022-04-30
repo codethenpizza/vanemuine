@@ -8,7 +8,7 @@
     "start": "npm run build && node dist/index.js",
     "dev": "nodemon",
     "babel-node": "babel-node --presets @babel/preset-env",
-    "build": "tsc --project ./ && babel dist -d dist"
+    "build": "rm -rf ./dist && tsc --project ./ && babel dist -d dist"
   },
   "keywords": [],
   "author": "",
