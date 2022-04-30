@@ -24,11 +24,11 @@ export class Dictionary {
     this.loadingState = status
   }
 
-  public async addWord(word: string, translation: string) {
+  public async addWord(word: string, translation: string): Promise<void> {
     if (!word.length || !translation.length) {
       throw new Error(`addWord error: word and translation are required`)
     }
-    return this.prisma.word.create({
+    await this.prisma.word.create({
       data: {
         wordDef: word,
         translation: {
@@ -39,10 +39,11 @@ export class Dictionary {
         }
       }
     })
+    await this.getWords(true)
   }
 
-  public async getWords(): Promise<DictionaryWords> {
-    if (this.words.length) {
+  public async getWords(force = false): Promise<DictionaryWords> {
+    if (this.words.length && !force) {
       return this.words
     }
     try {

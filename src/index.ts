@@ -11,6 +11,7 @@ async function main() {
 
   /* General commands */
   bot.onText(/\/marco/, async (msg) => {
+    await botController.showDictionary(msg)
     await botController.ping(msg)
   });
 
@@ -18,14 +19,24 @@ async function main() {
     await botController.attemptAddWords(msg)
   });
 
+  bot.onText(/\/count/, async (msg) => {
+    await botController.getUserListCount(msg)
+    await botController.sendMsg({msg, text: `words: ${botController.dictionary.words.length}`})
+  });
+
   /* Walk through dictionary */
   bot.onText(/\/start/, async (msg) => {
-    await botController.showDictionary(msg)
+    if (msg.from?.id) {
+      await botController.getOrCreateUser(msg.from?.id)
+    }
+    await botController.sendMsg({msg, text: `Hi!`})
   });
 
   /* Games - Word List */
   bot.onText(/\/list/, async (msg) => {
-    console.log(msg)
+    if (msg.from?.id) {
+      await botController.getOrCreateUser(msg.from?.id)
+    }
     await botController.handleWodListGame(msg)
   });
 

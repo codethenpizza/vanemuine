@@ -10,14 +10,26 @@ datasource db {
 model Translation {
   id               Int      @id @default(autoincrement())
   translationDef   String
-  lang String
-  word Word @relation(fields: [wordId], references: [id])
-  wordId Int @unique
+  lang             String
+  word             Word     @relation(fields: [wordId], references: [id])
+  wordId           Int      @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }
 
 model Word {
-  id        Int     @id @default(autoincrement())
-  wordDef   String
-  desc      String?
-  translation Translation?
+  id               Int     @id @default(autoincrement())
+  wordDef          String
+  desc             String?
+  translation      Translation?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  telegramId       Int      @unique
+  lng              String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }

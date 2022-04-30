@@ -1,9 +1,9 @@
 import TelegramBot, {Message} from 'node-telegram-bot-api'
 import {PrismaClient} from "@prisma/client";
 import {WordList} from "../games/word-list";
-import {BaseBotController} from "./base-bot-controller";
+import {BotAuth} from "./bot-auth";
 
-export class BotController extends BaseBotController{
+export class BotController extends BotAuth {
   wordListGame: WordList
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
@@ -13,7 +13,6 @@ export class BotController extends BaseBotController{
 
   /* Add words */
   public async attemptAddWords(msg: Message) {
-    console.log(msg.from?.id)
     if (!this.isAdmin(msg.from?.id)) {
       await this.sendMsg({msg, text: this.errorMsgTemplate})
       return
