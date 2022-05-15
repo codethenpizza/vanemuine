@@ -18,21 +18,26 @@ export class WordList {
   constructor(prisma: PrismaClient, getUser: BotController['getOrCreateUser']) {
     this.dictionary = new Dictionary(prisma)
     this.getUser = getUser
-    this.translationWords = []
+    this.translationWords = [] // used to generate random answers
   }
 
   /*
   * get words and create linked list for future iterations
   * */
   public async setWordList(playerId: number): Promise<ListNode<PlayerDataWord>> {
-    const words = await this.dictionary.getWords()
-    this.translationWords = words
+    const allWords = await this.dictionary.getWords()
+
+    this.translationWords = allWords
       .map(({translation}) => translation?.translationDef)
       .filter(Boolean)
       .sort(() => 0.5 - Math.random())
       .slice(0, this.maxQuizLength) as string []
 
-    const list = new LinkedList(words)
+    const gameWords = allWords
+      .sort(() => 0.5 - Math.random())
+      .slice(0, this.maxQuizLength)
+
+    const list = new LinkedList(gameWords)
     await this.updateUserMetaWithWordsList(playerId, list)
     return list.firstNode
   }
