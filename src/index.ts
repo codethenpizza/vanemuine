@@ -37,17 +37,20 @@ async function main() {
     if (msg.from?.id) {
       await botController.getOrCreateUser(msg.from?.id)
     }
-    await botController.handleWodListGame(msg)
+    await botController.handleWordListGame(msg)
   });
 
   bot.on("callback_query", async ({message, data}) => {
     if (message) {
+      // console.log(message, data)
       if (data?.match(botController.wordListGame.name)) {
-        await botController.listGameNextStep(message, data)
+        await botController.listGameHandleAnswer(message, data)
       }
       if (data?.match(botController.dictionary.addAction)) {
         await botController.addAction(message, data)
       }
+
+      await botController.removeInlineMarkup(message.chat.id, message.message_id)
     }
   });
 

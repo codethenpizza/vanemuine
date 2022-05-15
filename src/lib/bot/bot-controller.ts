@@ -1,20 +1,20 @@
 import TelegramBot, {Message} from 'node-telegram-bot-api'
 import {PrismaClient} from "@prisma/client";
-import {WordList} from "../games/word-list";
 import {BotAuth} from "./bot-auth";
+import {WordListBotAdapter} from "../games/word-list/bot-adapter";
 
 export class BotController extends BotAuth {
-  wordListGame: WordList
+  wordListGame: WordListBotAdapter
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
     super(bot, prisma)
-    this.wordListGame = new WordList(prisma)
+    this.wordListGame = new WordListBotAdapter(prisma)
   }
 
   /* Add words */
   public async attemptAddWords(msg: Message) {
     if (!this.isAdmin(msg.from?.id)) {
-      await this.sendMsg({msg, text: this.errorMsgTemplate})
+      await this.processError({msg, e: `User is not admin. Id: ${msg.from?.id}`})
       return
     }
     const [word, translation] = msg.text?.replace('/add', '').trim().split(':') || []
@@ -44,7 +44,7 @@ export class BotController extends BotAuth {
       await this.dictionary.addWord(word, translation)
       await this.sendMsg({msg, text: 'Done'})
     } catch (e) {
-      await this.sendMsg({msg, text: this.errorMsgTemplate})
+      await this.processError({msg, e})
     }
   }
 
@@ -60,21 +60,25 @@ export class BotController extends BotAuth {
   }
 
   /* Word list game */
-  public async handleWodListGame(msg: Message) {
+  public async handleWordListGame(msg: Message) {
     try {
       if (msg.text?.match('\/list')) {
-        const resp = await this.wordListGame.setWordList(msg.chat.id)
+        const resp = await this.wordListGame.startGame(msg.chat.id)
         await this.sendMsg({msg, ...resp});
       }
     } catch (e) {
-      await this.sendMsg({msg, text: this.errorMsgTemplate})
+      await this.processError({msg, e})
     }
   }
 
-  public async listGameNextStep(msg: Message, answer?: string) {
-    const text = this.wordListGame.verifyAnswer(answer)
+  public async listGameHandleAnswer(msg: Message, answer?: string) {
+    if (!msg.from?.id) {
+      return this.processError({msg, e: 'listGameHandleAnswer: msg.from?.id empty'})
+    }
+
+    const text = this.wordListGame.processAnswer(msg.chat?.id, answer)
     await this.sendMsg({msg, text})
-    const nextStep = await this.wordListGame.getNext(msg.chat.id)
+    const nextStep = await this.wordListGame.getGameNextStep(msg.chat.id)
     await this.sendMsg({msg, ...nextStep});
   }
 }

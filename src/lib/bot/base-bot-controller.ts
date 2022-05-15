@@ -7,6 +7,12 @@ export type SendMsgArgs = {
   msg: Message, text: string, options?: SendMessageOptions
 }
 
+export type ProcessErrorArgs = {
+  msg: Message,
+  textToSend?: string
+  e?: any // error e.g. from catch
+}
+
 export class BaseBotController {
   bot: TelegramBot
   dictionary: Dictionary
@@ -27,12 +33,20 @@ export class BaseBotController {
     await this.bot.sendMessage(chatId, text, options)
   }
 
+  public async removeInlineMarkup(chatId: number, msgId: number) {
+    await this.bot.editMessageReplyMarkup({inline_keyboard: []}, {message_id: msgId, chat_id: chatId})
+  }
+
   public async ping(msg: Message) {
     try {
       await this.sendMsg({msg, text: `Polo`})
     } catch (e) {
-      console.error(e)
-      await this.sendMsg( {msg, text: this.errorMsgTemplate})
+      await this.processError({msg, e})
     }
+  }
+
+  public async processError({msg, textToSend, e}: ProcessErrorArgs): Promise<void> {
+    console.error(e)
+    await this.sendMsg({msg, text: textToSend || this.errorMsgTemplate})
   }
 }

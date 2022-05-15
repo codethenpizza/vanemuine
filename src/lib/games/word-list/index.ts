@@ -1,16 +1,16 @@
 import {PrismaClient} from "@prisma/client";
 import {Dictionary} from "../../dictionary";
 import {LinkedList, ListNode} from "../../../helpers/linked-list";
-import {SendMsgArgs} from "../../bot/base-bot-controller";
+import {capitalize} from "../../../helpers/capitalize";
 
-type RandomAnswer = {
+export type RandomAnswer = {
   text: string
   isCorrect: boolean
 }
 
-type PlayerDataWord = Unpacked<Dictionary['words']>
+export type PlayerDataWord = Unpacked<Dictionary['words']> & { options?: RandomAnswer[] }
 
-type PlayerData = {
+export type PlayerData = {
   list: LinkedList<PlayerDataWord>
   node: Nullable<ListNode<PlayerDataWord>>
 }
@@ -21,72 +21,65 @@ export class WordList {
   translationWords: string[]
 
   // info
+  // TODO: add word length
   name = 'word-list-game'
   endMsgTemplate = 'Слова закончились :C'
-  correctMsgTemplate = 'Все верно'
-  incorrectMsgTemplate = 'Упс, не верно'
+  answerOptionsLength = 4
 
   constructor(prisma: PrismaClient) {
     this.dictionary = new Dictionary(prisma)
-    this.listMap = {}
+    this.listMap = {} // TODO: move user cache to user in bot auth to be able to remove it automatically and avoid memory leak
     this.translationWords = []
   }
 
-
-
-  public async setWordList(playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
+  public async setWordList(playerId: number): Promise<ListNode<PlayerDataWord>> {
     const words = await this.dictionary.getWords()
     this.translationWords = words.map(({translation}) => translation?.translationDef).filter(Boolean) as string[]
 
     const list = new LinkedList(words)
     this.listMap[playerId] = {
       list,
-      node: list.firstNode
+      node: this.composeNodeOptions(list.firstNode)
     }
-    return this.composeResponse(list.firstNode)
+    return list.firstNode
   }
 
-  public async getNext(playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
-    const node = this.listMap[playerId].node
-    if (node) {
-      this.listMap[playerId].node = node.next
+  public async getNext(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
+    const node = this.listMap[playerId]?.node || null
+    if (!node?.next) {
+      return null // game is over
     }
-    return this.composeResponse(this.listMap[playerId].node)
+
+    this.listMap[playerId].node = this.composeNodeOptions(node.next)
+    return this.listMap[playerId].node
   }
 
-  public verifyAnswer(answer?: string): string {
-    const isCorrect = answer?.match('true')
-    return isCorrect ? this.correctMsgTemplate : this.incorrectMsgTemplate
+  private composeNodeOptions(node: ListNode<PlayerDataWord>): Nullable<ListNode<PlayerDataWord>> {
+    if (!node.value.translation?.translationDef) {
+      return node
+    }
+    node.value.options = this.getOptions(node.value.translation?.translationDef)
+    return node
   }
 
-  private composeResponse(node: PlayerData['node'] | null): Omit<SendMsgArgs, 'msg'> {
-    if (!node) {
-      return {
-        text: this.endMsgTemplate
-      }
-    }
-    if (!node?.value.translation?.translationDef) {
-      return {
-        text: 'упс'
-      }
-    }
-
-    const text = `${node?.value.wordDef}`
-    const answers = this.getAnswers(node?.value.translation?.translationDef)
-
+  protected verifyAnswer(playerId: number, answer?: string): { result: boolean, correctAnswer: string } {
+    const correctAnswer = this.listMap[playerId]?.node?.value.options?.find(a => a.isCorrect) || null
     return {
-      text,
-      options:  {
-        reply_markup: {
-          inline_keyboard: answers.map(({text, isCorrect}) => [{text, callback_data: `${this.name}:${isCorrect}`}])
-        }
-      }
+      correctAnswer: correctAnswer?.text || '',
+      result: correctAnswer?.text === answer
     }
   }
 
-  private getAnswers(correctAnswer: string): RandomAnswer[] {
-    const shuffled = [...this.translationWords].sort(() => 0.5 - Math.random()).slice(0, 4)
-    const withCorrectAnswer = Array.from(new Set([...shuffled, correctAnswer])).sort(() => 0.5 - Math.random())
-    return withCorrectAnswer.map(text => ({text: text.charAt(0).toUpperCase() + text.slice(1), isCorrect: text === correctAnswer }))
+  private getOptions(correctAnswer: string): RandomAnswer[] {
+    const shuffled = [...this.translationWords].sort(() => 0.5 - Math.random()).slice(0, this.answerOptionsLength)
+    const withCorrectAnswer = Array.from(new Set([...shuffled, correctAnswer]))
+    if (withCorrectAnswer.length > this.answerOptionsLength) {
+      // remove one element in case if array with answer longer than should
+      withCorrectAnswer.shift()
+    }
+    return withCorrectAnswer.sort(() => 0.5 - Math.random()).map(text => ({
+      text: capitalize(text),
+      isCorrect: text === correctAnswer
+    }))
   }
 }

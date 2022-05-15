@@ -18,8 +18,7 @@ export class BotAuth extends BaseBotController {
 
   public async getUserListCount(msg: Message): Promise<void> {
     if (!this.isAdmin(msg.from?.id)) {
-      await this.sendMsg({msg, text: this.errorMsgTemplate})
-      return
+      return this.processError({msg, e: `User is not admin. Id: ${msg.from?.id}`})
     }
     await this.sendMsg({msg, text: `${Object.keys(this.usersMap)?.length || 0}`})
   }
