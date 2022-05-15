@@ -1,14 +1,12 @@
 import {BaseBotController} from "./base-bot-controller";
 import TelegramBot, {Message} from "node-telegram-bot-api";
 import {PrismaClient} from "@prisma/client";
-import {Language} from "../../types";
+import {Language, User} from "../../types";
 import {minsToMs} from "../../helpers/mins-to-ms";
-
-export type User = { id: number, telegramId: number, lng: Language }
 
 export class BotAuth extends BaseBotController {
   prisma: PrismaClient
-  usersMap: Record<number, User>
+  private readonly usersMap: Record<number, User>
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
     super(bot, prisma);
@@ -47,7 +45,7 @@ export class BotAuth extends BaseBotController {
       delete this.usersMap[userId]
       return
     }
-    setTimeout(() => delete this.usersMap[userId], minsToMs(30))
+    setTimeout(() => delete this.usersMap[userId], minsToMs(180))
   }
 
 }

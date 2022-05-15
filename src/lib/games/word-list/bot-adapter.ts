@@ -1,38 +1,41 @@
 import {SendMsgArgs} from "../../bot/base-bot-controller";
-
-import {PlayerData, WordList} from "./index";
+import {WordList} from "./index";
 import {PrismaClient} from "@prisma/client";
 import {capitalize} from "../../../helpers/capitalize";
+import {BotController} from "../../bot/bot-controller";
+import {UserWordListMeta} from "./types";
 
 
 export class WordListBotAdapter extends WordList{
   correctMsgTemplate = (correctAnswer?: string): string => `✅ Все верно, ${correctAnswer} это правильный ответ!`
   incorrectMsgTemplate = (correctAnswer: string, answer?: string, ): string => `🌚 Упс, '${answer}' это не верно. Правильный ответ: '${correctAnswer}'`
+  endMsgTemplate = (score: string) => `Слова закончились :C\nСкор: ${score}`
 
-  constructor(prisma: PrismaClient) {
-    super(prisma)
+  constructor(prisma: PrismaClient, getUser: BotController['getOrCreateUser']) {
+    super(prisma, getUser)
   }
 
   public async startGame(playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
     const node = await this.setWordList(playerId);
-    return this.composeResponse(node)
+    return this.composeResponse(node, playerId)
   }
 
   public async getGameNextStep(playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
     const node = await this.getNext(playerId);
-    return this.composeResponse(node)
+    return this.composeResponse(node, playerId)
   }
 
-  public processAnswer(playerId: number, answer?: string): string {
+  public async processAnswer(playerId: number, answer?: string): Promise<string> {
     const [, option] = answer?.split(':') || []
-    const {correctAnswer, result } = this.verifyAnswer(playerId, option)
-    return result ? this.correctMsgTemplate(option) : this.incorrectMsgTemplate(correctAnswer, option)
+    const {correctAnswer, isCorrect } = await this.verifyAnswer(playerId, option)
+    return isCorrect ? this.correctMsgTemplate(option) : this.incorrectMsgTemplate(correctAnswer, option)
   }
 
-  private composeResponse(node: PlayerData['node'] | null): Omit<SendMsgArgs, 'msg'> {
+  private async composeResponse(node: UserWordListMeta['node'] | null, playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
     if (!node) {
+      const score = await this.getScore(playerId)
       return {
-        text: this.endMsgTemplate
+        text: this.endMsgTemplate(score)
       }
     }
     if (!node?.value.translation?.translationDef) {

@@ -8,7 +8,7 @@ export class BotController extends BotAuth {
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
     super(bot, prisma)
-    this.wordListGame = new WordListBotAdapter(prisma)
+    this.wordListGame = new WordListBotAdapter(prisma, this.getOrCreateUser.bind(this))
   }
 
   /* Add words */
@@ -76,7 +76,7 @@ export class BotController extends BotAuth {
       return this.processError({msg, e: 'listGameHandleAnswer: msg.from?.id empty'})
     }
 
-    const text = this.wordListGame.processAnswer(msg.chat?.id, answer)
+    const text = await this.wordListGame.processAnswer(msg.chat?.id, answer)
     await this.sendMsg({msg, text})
     const nextStep = await this.wordListGame.getGameNextStep(msg.chat.id)
     await this.sendMsg({msg, ...nextStep});

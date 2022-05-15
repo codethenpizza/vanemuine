@@ -2,59 +2,57 @@ import {PrismaClient} from "@prisma/client";
 import {Dictionary} from "../../dictionary";
 import {LinkedList, ListNode} from "../../../helpers/linked-list";
 import {capitalize} from "../../../helpers/capitalize";
-
-export type RandomAnswer = {
-  text: string
-  isCorrect: boolean
-}
-
-export type PlayerDataWord = Unpacked<Dictionary['words']> & { options?: RandomAnswer[] }
-
-export type PlayerData = {
-  list: LinkedList<PlayerDataWord>
-  node: Nullable<ListNode<PlayerDataWord>>
-}
+import {BotController} from "../../bot/bot-controller";
+import {PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes} from "./types";
 
 export class WordList {
-  listMap: Record<number, PlayerData> // id of player
   dictionary: Dictionary
   translationWords: string[]
+  getUser: BotController['getOrCreateUser']
 
   // info
-  // TODO: add word length
   name = 'word-list-game'
-  endMsgTemplate = 'Слова закончились :C'
-  answerOptionsLength = 4
+  maxQuizLength = 10
+  maxAnswerOptionsLength = 4
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: PrismaClient, getUser: BotController['getOrCreateUser']) {
     this.dictionary = new Dictionary(prisma)
-    this.listMap = {} // TODO: move user cache to user in bot auth to be able to remove it automatically and avoid memory leak
+    this.getUser = getUser
     this.translationWords = []
   }
 
+  /*
+  * get words and create linked list for future iterations
+  * */
   public async setWordList(playerId: number): Promise<ListNode<PlayerDataWord>> {
     const words = await this.dictionary.getWords()
-    this.translationWords = words.map(({translation}) => translation?.translationDef).filter(Boolean) as string[]
+    this.translationWords = words
+      .map(({translation}) => translation?.translationDef)
+      .filter(Boolean)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, this.maxQuizLength) as string []
 
     const list = new LinkedList(words)
-    this.listMap[playerId] = {
-      list,
-      node: this.composeNodeOptions(list.firstNode)
-    }
+    await this.updateUserMetaWithWordsList(playerId, list)
     return list.firstNode
   }
 
+  /*
+  * set next step and return it
+  * */
   public async getNext(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
-    const node = this.listMap[playerId]?.node || null
+    const node = await this.getNode(playerId) || null
     if (!node?.next) {
       return null // game is over
     }
 
-    this.listMap[playerId].node = this.composeNodeOptions(node.next)
-    return this.listMap[playerId].node
+    return this.updateNode(playerId, this.composeNodeOptions(node.next))
   }
 
-  private composeNodeOptions(node: ListNode<PlayerDataWord>): Nullable<ListNode<PlayerDataWord>> {
+  /*
+  * populate word node with answers for quiz
+  * */
+  private composeNodeOptions(node: ListNode<PlayerDataWord>): ListNode<PlayerDataWord> {
     if (!node.value.translation?.translationDef) {
       return node
     }
@@ -62,18 +60,30 @@ export class WordList {
     return node
   }
 
-  protected verifyAnswer(playerId: number, answer?: string): { result: boolean, correctAnswer: string } {
-    const correctAnswer = this.listMap[playerId]?.node?.value.options?.find(a => a.isCorrect) || null
+  /*
+  * verify answer and return boolean isCorrect and correct answer
+  * */
+  protected async verifyAnswer(playerId: number, answer?: string): Promise<VerifyAnswerRes> {
+    const node = await this.getNode(playerId)
+    const correctAnswer = node?.value.options?.find(a => a.isCorrect) || null
+    const isCorrect = correctAnswer?.text === answer
+    if (isCorrect) {
+      await this.updateScore(playerId)
+    }
+
     return {
       correctAnswer: correctAnswer?.text || '',
-      result: correctAnswer?.text === answer
+      isCorrect
     }
   }
 
+  /*
+  * return shuffled answer options with correct answer
+  * */
   private getOptions(correctAnswer: string): RandomAnswer[] {
-    const shuffled = [...this.translationWords].sort(() => 0.5 - Math.random()).slice(0, this.answerOptionsLength)
+    const shuffled = [...this.translationWords].sort(() => 0.5 - Math.random()).slice(0, this.maxAnswerOptionsLength)
     const withCorrectAnswer = Array.from(new Set([...shuffled, correctAnswer]))
-    if (withCorrectAnswer.length > this.answerOptionsLength) {
+    if (withCorrectAnswer.length > this.maxAnswerOptionsLength) {
       // remove one element in case if array with answer longer than should
       withCorrectAnswer.shift()
     }
@@ -81,5 +91,67 @@ export class WordList {
       text: capitalize(text),
       isCorrect: text === correctAnswer
     }))
+  }
+
+  /*
+  * add game temporary metadata to user which stored in memory
+  * */
+  private async updateUserMetaWithWordsList(playerId: number, list: UserWordListMeta['list'] ): Promise<void> {
+    const user = await this.getUser(playerId)
+    const userMeta: UserWordListMeta = {
+      list,
+      node: this.composeNodeOptions(list.firstNode),
+      score: 0
+    }
+
+    user.meta = {
+      ...user.meta,
+      [this.name]: userMeta
+    }
+  }
+
+  /*
+  * create metadata if user was removed from memory because of long afk
+  * */
+  private async getOrCreateUserMeta(playerId: number): Promise<UserWordListMeta> {
+    const user = await this.getUser(playerId)
+    if (!user.meta?.[this.name]) {
+      await this.setWordList(playerId)
+    }
+    return user.meta?.[this.name] as UserWordListMeta
+  }
+
+  /*
+  * get current step of the game
+  * */
+  private async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
+    const userMeta = await this.getOrCreateUserMeta(playerId)
+    return userMeta.node || null
+  }
+
+  /*
+  * used to set next step of the game
+  * */
+  private async updateNode(playerId: number, node: ListNode<PlayerDataWord>): Promise<Nullable<ListNode<PlayerDataWord>>> {
+    const userMeta = await this.getOrCreateUserMeta(playerId)
+    userMeta.node = node
+    return node
+  }
+
+  /*
+ * get user score of current game
+ * */
+  public async getScore(playerId: number): Promise<string> {
+    const userMeta = await this.getOrCreateUserMeta(playerId)
+    return `${userMeta.score} / ${userMeta.list.length}`
+  }
+
+  /*
+  * update user score of current game
+  * */
+  private async updateScore(playerId: number): Promise<number> {
+    const userMeta = await this.getOrCreateUserMeta(playerId)
+    userMeta.score = ++userMeta.score
+    return userMeta.score
   }
 }
