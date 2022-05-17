@@ -34,7 +34,11 @@ export class BaseBotController {
   }
 
   public async removeInlineMarkup(chatId: number, msgId: number) {
-    await this.bot.editMessageReplyMarkup({inline_keyboard: []}, {message_id: msgId, chat_id: chatId})
+    try {
+      await this.bot.editMessageReplyMarkup({inline_keyboard: []}, {message_id: msgId, chat_id: chatId})
+    } catch (e) {
+      console.error('removeInlineMarkup err:', e)
+    }
   }
 
   public async ping(msg: Message) {

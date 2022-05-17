@@ -32,7 +32,8 @@ export class BotAuth extends BaseBotController {
       update: {},
       create: {
         telegramId,
-        lng: Language.RU
+        lng: Language.RU,
+        gamesPlayed: 0
       }
     })
     this.usersMap[user.telegramId] = user as User
@@ -48,4 +49,20 @@ export class BotAuth extends BaseBotController {
     setTimeout(() => delete this.usersMap[userId], minsToMs(180))
   }
 
+  // TODO: move somewhere to more related place
+  public async updateUserGamesCount(telegramId: number) {
+    try {
+      const user = await this.getOrCreateUser(telegramId);
+      await this.prisma.user.update({
+        where: {
+          telegramId
+        },
+        data: {
+          gamesPlayed: user.gamesPlayed+1
+        }
+      })
+    } catch (e) {
+      console.error('unable to update gamesPlayed', e)
+    }
+  }
 }

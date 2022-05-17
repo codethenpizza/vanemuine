@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Translation {
-  id               Int      @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   translationDef   String
   lang             String
-  word             Word     @relation(fields: [wordId], references: [id])
-  wordId           Int      @unique
+  word             Word               @relation(fields: [wordId], references: [id])
+  wordId           Int                @unique
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 }
 
 model Word {
-  id               Int     @id @default(autoincrement())
+  id               Int                @id @default(autoincrement())
   wordDef          String
   desc             String?
   translation      Translation?
@@ -27,8 +27,9 @@ model Word {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  telegramId       Int      @unique
+  id               Int                @id @default(autoincrement())
+  telegramId       Int                @unique
+  gamesPlayed      Int                @default(0)
   lng              String
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt

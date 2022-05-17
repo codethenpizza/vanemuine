@@ -1,6 +1,7 @@
 import {PrismaClient} from "@prisma/client";
 import {DictionaryLoadingState} from "./types";
 import {Language} from "../../types";
+import {source} from "./source";
 
 type DictionaryWords = { id: number, wordDef: string, translation: { translationDef: string } | null }[]
 
@@ -22,6 +23,13 @@ export class Dictionary {
 
   private setLoadingStatus(status: DictionaryLoadingState): void {
     this.loadingState = status
+  }
+
+  public async updateSource(): Promise<void> {
+    // TODO: add bulk create with relations
+    for (const {wordDef, translation} of source.words) {
+      await this.addWord(wordDef, translation)
+    }
   }
 
   public async addWord(word: string, translation: string): Promise<void> {

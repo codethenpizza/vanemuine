@@ -8,7 +8,7 @@ export class BotController extends BotAuth {
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
     super(bot, prisma)
-    this.wordListGame = new WordListBotAdapter(prisma, this.getOrCreateUser.bind(this))
+    this.wordListGame = new WordListBotAdapter(prisma, this.getOrCreateUser.bind(this), this.updateUserGamesCount.bind(this))
   }
 
   /* Add words */
@@ -47,6 +47,21 @@ export class BotController extends BotAuth {
       await this.processError({msg, e})
     }
   }
+
+  public async updateSource(msg: Message) {
+    try {
+      if (!this.isAdmin(msg.chat?.id)) {
+        await this.sendMsg({msg, text: 'You are not admin, liar'})
+        return
+      }
+
+      await this.dictionary.updateSource()
+      await this.sendMsg({msg, text: 'Done'})
+    } catch (e) {
+      await this.processError({msg, e})
+    }
+  }
+
 
   /* Show all dictionary */
   public async showDictionary(msg: Message) {

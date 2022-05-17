@@ -19,6 +19,10 @@ async function main() {
     await botController.attemptAddWords(msg)
   });
 
+  bot.onText(/\/updateSource/, async (msg) => {
+    await botController.updateSource(msg)
+  });
+
   bot.onText(/\/count/, async (msg) => {
     await botController.getUserListCount(msg)
     await botController.sendMsg({msg, text: `words: ${botController.dictionary.words.length}`})

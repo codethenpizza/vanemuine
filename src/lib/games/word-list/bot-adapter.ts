@@ -10,9 +10,11 @@ export class WordListBotAdapter extends WordList{
   correctMsgTemplate = (correctAnswer?: string): string => `✅ Все верно, ${correctAnswer} это правильный ответ!`
   incorrectMsgTemplate = (correctAnswer: string, answer?: string, ): string => `🌚 Упс, '${answer}' это не верно. Правильный ответ: '${correctAnswer}'`
   endMsgTemplate = (score: string) => `Слова закончились :C\nСкор: ${score}`
+  onGameEnd: (playerId: number) => Promise<void>
 
-  constructor(prisma: PrismaClient, getUser: BotController['getOrCreateUser']) {
+  constructor(prisma: PrismaClient, getUser: BotController['getOrCreateUser'], onGameEnd: (playerId: number) => Promise<void>) {
     super(prisma, getUser)
+    this.onGameEnd = onGameEnd
   }
 
   public async startGame(playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
@@ -34,6 +36,11 @@ export class WordListBotAdapter extends WordList{
   private async composeResponse(node: UserWordListMeta['node'] | null, playerId: number): Promise<Omit<SendMsgArgs, 'msg'>> {
     if (!node) {
       const score = await this.getScore(playerId)
+
+      // ignore this promise because it's only gather analytics and not necessary
+      // TODO: move somewhere so user can get score before analytics update
+      this.onGameEnd(playerId)
+
       return {
         text: this.endMsgTemplate(score)
       }
