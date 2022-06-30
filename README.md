@@ -1,3 +1,5 @@
+Telegram bot which helps me to learn the Estonian language with quiz game
+
 ### Generate migration  
 `prisma migrate dev --name "migration_name"`
 
