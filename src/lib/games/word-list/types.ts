@@ -1,5 +1,5 @@
-import {Dictionary} from "../../dictionary";
-import {LinkedList, ListNode} from "../../../helpers/linked-list";
+import { Dictionary } from '../../dictionary'
+import { LinkedList, ListNode } from '../../../helpers/linked-list'
 
 export type RandomAnswer = {
   text: string
@@ -14,4 +14,4 @@ export type UserWordListMeta = {
   score: number
 }
 
-export type VerifyAnswerRes = { isCorrect: boolean, correctAnswer: string }
+export type VerifyAnswerRes = { isCorrect: boolean; correctAnswer: string }

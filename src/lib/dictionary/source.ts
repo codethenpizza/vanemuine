@@ -1,5 +1,5 @@
-import {Word} from "@prisma/client"
-import {CategoryNames} from "./types";
+import { Word } from '@prisma/client'
+import { CategoryNames } from './types'
 
 type WordSource = { translationDef: string } & Pick<Word, 'wordDef'>
 type CategorySource = Record<CategoryNames, WordSource[]>
@@ -7,136 +7,136 @@ type CategorySource = Record<CategoryNames, WordSource[]>
 export const categorySource: CategorySource = {
   [CategoryNames.BASIC]: [
     {
-      wordDef: "aitäh",
-      translationDef: "спасибо",
+      wordDef: 'aitäh',
+      translationDef: 'спасибо',
     },
     {
-      wordDef: "palun",
-      translationDef: "пожалуйста",
+      wordDef: 'palun',
+      translationDef: 'пожалуйста',
     },
     {
-      wordDef: "tere",
-      translationDef: "привет",
+      wordDef: 'tere',
+      translationDef: 'привет',
     },
     {
-      wordDef: "kuidas läheb?",
-      translationDef: "как дела?",
-    }
+      wordDef: 'kuidas läheb?',
+      translationDef: 'как дела?',
+    },
   ],
   [CategoryNames.FOOD]: [
     {
-      wordDef: "kallis",
-      translationDef: "мёд",
+      wordDef: 'kallis',
+      translationDef: 'мёд',
     },
     {
-      wordDef: "leiba",
-      translationDef: "хлеб",
+      wordDef: 'leiba',
+      translationDef: 'хлеб',
     },
     {
-      wordDef: "kana",
-      translationDef: "курица",
+      wordDef: 'kana',
+      translationDef: 'курица',
     },
     {
-      wordDef: "veiseliha",
-      translationDef: "говядина",
+      wordDef: 'veiseliha',
+      translationDef: 'говядина',
     },
     {
-      wordDef: "sealiha",
-      translationDef: "свинина",
+      wordDef: 'sealiha',
+      translationDef: 'свинина',
     },
     {
-      wordDef: "vorst",
-      translationDef: "колбаса",
+      wordDef: 'vorst',
+      translationDef: 'колбаса',
     },
   ],
   [CategoryNames.ANIMALS]: [
     {
-      wordDef: "kass",
-      translationDef: "кот"
+      wordDef: 'kass',
+      translationDef: 'кот',
     },
     {
-      wordDef: "koer",
-      translationDef: "собака"
+      wordDef: 'koer',
+      translationDef: 'собака',
     },
   ],
   [CategoryNames.DAYS_OF_WEEK]: [
     {
-      wordDef: "esmaspäev",
-      translationDef: "понедельник"
+      wordDef: 'esmaspäev',
+      translationDef: 'понедельник',
     },
     {
-      wordDef: "teisipäev",
-      translationDef: "вторник"
+      wordDef: 'teisipäev',
+      translationDef: 'вторник',
     },
     {
-      wordDef: "neljapäev",
-      translationDef: "четверг"
+      wordDef: 'neljapäev',
+      translationDef: 'четверг',
     },
     {
-      wordDef: "kolmapäev",
-      translationDef: "среда"
+      wordDef: 'kolmapäev',
+      translationDef: 'среда',
     },
     {
-      wordDef: "reedel",
-      translationDef: "пятница"
+      wordDef: 'reedel',
+      translationDef: 'пятница',
     },
     {
-      wordDef: "laupäev",
-      translationDef: "суббота"
+      wordDef: 'laupäev',
+      translationDef: 'суббота',
     },
     {
-      wordDef: "pühapäev",
-      translationDef: "воскресенье"
+      wordDef: 'pühapäev',
+      translationDef: 'воскресенье',
     },
   ],
   [CategoryNames.MONTH]: [
     {
-      wordDef: "jaanuar",
-      translationDef: "январь"
+      wordDef: 'jaanuar',
+      translationDef: 'январь',
     },
     {
-      wordDef: "veebruar",
-      translationDef: "февраль"
+      wordDef: 'veebruar',
+      translationDef: 'февраль',
     },
     {
-      wordDef: "märts",
-      translationDef: "март"
+      wordDef: 'märts',
+      translationDef: 'март',
     },
     {
-      wordDef: "aprill",
-      translationDef: "апрель"
+      wordDef: 'aprill',
+      translationDef: 'апрель',
     },
     {
-      wordDef: "mai",
-      translationDef: "май"
+      wordDef: 'mai',
+      translationDef: 'май',
     },
     {
-      wordDef: "juuni",
-      translationDef: "июнь"
+      wordDef: 'juuni',
+      translationDef: 'июнь',
     },
     {
-      wordDef: "juuli",
-      translationDef: "июль"
+      wordDef: 'juuli',
+      translationDef: 'июль',
     },
     {
-      wordDef: "august",
-      translationDef: "август"
+      wordDef: 'august',
+      translationDef: 'август',
     },
     {
-      wordDef: "september",
-      translationDef: "сентябрь"
+      wordDef: 'september',
+      translationDef: 'сентябрь',
     },
     {
-      wordDef: "oktoober",
-      translationDef: "октябрь"
+      wordDef: 'oktoober',
+      translationDef: 'октябрь',
     },
     {
-      wordDef: "november",
-      translationDef: "ноябрь"
+      wordDef: 'november',
+      translationDef: 'ноябрь',
     },
     {
-      wordDef: "detsember",
-      translationDef: "декабрь"
-    }
-  ]
+      wordDef: 'detsember',
+      translationDef: 'декабрь',
+    },
+  ],
 }

@@ -14,7 +14,7 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
-    "baseUrl": "src",
+    "baseUrl": "./src/",
     "outDir": "dist",                        /* Redirect output structure to the directory. */
     "strict": true,                           /* Enable all strict type-checking options. */
     "noImplicitAny": true,                    /* Raise error on expressions and declarations with an implied 'any' type. */

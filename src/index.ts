@@ -1,42 +1,42 @@
 import { PrismaClient } from '@prisma/client'
-import TelegramBot from "node-telegram-bot-api";
-import getBot from "./lib/bot/bot-init";
-import {BotController} from "./lib/bot/bot-controller";
+import TelegramBot from 'node-telegram-bot-api'
+import getBot from './lib/bot/bot-init'
+import { BotController } from './lib/bot/bot-controller'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  const bot: TelegramBot = await getBot();
-  const botController = new BotController(bot, prisma);
+  const bot: TelegramBot = await getBot()
+  const botController = new BotController(bot, prisma)
 
   /* General commands */
   botController.onAdminText(/\/marco/, async (msg) => {
     await botController.showDictionary(msg)
     await botController.showCategories(msg)
     await botController.ping(msg)
-  });
+  })
 
   botController.onAdminText(/\/updateSource/, async (msg) => {
     await botController.updateSource(msg)
-  });
+  })
 
   botController.onAdminText(/\/count/, async (msg) => {
     // used to debug active users
     await botController.getUserListCount(msg)
-    await botController.sendMsg({msg, text: `words: ${botController.dictionary.words.length}`})
-  });
+    await botController.sendMsg({ msg, text: `words: ${botController.dictionary.words.length}` })
+  })
 
   /* Walk through dictionary */
   botController.onAuthText(/\/start/, async (msg) => {
-    await botController.sendMsg({msg, text: `Hi! type \/list to start the quiz`})
-  });
+    await botController.sendMsg({ msg, text: 'Hi! type /list to start the quiz' })
+  })
 
   /* Games - Word List */
   botController.onAuthText(/\/list/, async (msg) => {
     await botController.handleWordListGame(msg)
-  });
+  })
 
-  bot.on("callback_query", async ({message, data}) => {
+  bot.on('callback_query', async ({ message, data }) => {
     if (message) {
       // console.log(message, data)
       if (data?.match(botController.wordListGame.name)) {
@@ -45,10 +45,7 @@ async function main() {
 
       await botController.removeInlineMarkup(message.chat.id, message.message_id)
     }
-  });
-
-
-
+  })
 }
 
 main()

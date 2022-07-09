@@ -1,6 +1,5 @@
-import {envFromNodeEnv, numberFromEnv, stringFromEnv} from "../../helpers/congif";
-
-export type Env = 'local' | 'dev' | 'production';
+import { envFromNodeEnv, numberFromEnv, stringFromEnv } from '../../helpers/congif'
+import { Env } from '../../types'
 
 export type Config = {
   env: Env
@@ -18,6 +17,6 @@ export const config: Config = {
     token: stringFromEnv(process.env.BOT_TOKEN),
     url: stringFromEnv(process.env.BOT_URL),
     port: numberFromEnv(process.env.BOT_PORT) || 433,
-    adminId: numberFromEnv(process.env.ADMIN_TELEGRAM_ID)
+    adminId: numberFromEnv(process.env.ADMIN_TELEGRAM_ID),
   },
 }

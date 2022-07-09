@@ -10,5 +10,5 @@ export enum CategoryNames {
   FOOD = 'food',
   // TIME = 'time',
   MONTH = 'month',
-  BASIC = 'basic'
+  BASIC = 'basic',
 }

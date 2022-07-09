@@ -1,24 +1,27 @@
-import {PrismaClient, Word, Translation, WordCategory} from "@prisma/client";
-import {CategoryNames, DictionaryLoadingState} from "./types";
-import {Language} from "../../types";
-import { categorySource} from "./source";
+import { PrismaClient, Word, Translation, WordCategory } from '@prisma/client'
+import { CategoryNames, DictionaryLoadingState } from './types'
+import { Language } from '../../types'
+import { categorySource } from './source'
 
-type DictionaryWord =
-  Pick<Word, 'id' | 'wordDef'>
-  & { translation: Pick<Translation, 'translationDef'> | null, wordCategory: Pick<WordCategory, 'categoryName'> }
-
+type DictionaryWord = Pick<Word, 'id' | 'wordDef'> & {
+  translation: Pick<Translation, 'translationDef'> | null
+  wordCategory: Pick<WordCategory, 'categoryName'>
+}
 
 export class Dictionary {
   loadingState: DictionaryLoadingState
+
   prisma: PrismaClient
+
   words: DictionaryWord[]
-  categoryNames: CategoryNames[]
+
+  categories: CategoryNames[]
 
   constructor(prismaClient: PrismaClient) {
     this.loadingState = DictionaryLoadingState.PENDING
     this.prisma = prismaClient
     this.words = []
-    this.categoryNames = []
+    this.categories = []
   }
 
   private setLoadingStatus(status: DictionaryLoadingState): void {
@@ -26,32 +29,33 @@ export class Dictionary {
   }
 
   /*
-  * update words from the source (currently from dictionary/source.ts)
-  * */
+   * update words from the source (currently from dictionary/source.ts)
+   * */
   public async updateSource(): Promise<void> {
     // TODO: add bulk create with relations
-    for (const [categoryName, words] of Object.entries(categorySource))
+    for (const [categoryName, words] of Object.entries(categorySource)) {
       await this.prisma.wordCategory.create({
         data: {
           categoryName,
           words: {
-            create: words.map(({wordDef, translationDef}) => ({
+            create: words.map(({ wordDef, translationDef }) => ({
               wordDef,
               translation: {
                 create: {
                   translationDef,
-                  lang: Language.RU
-                }
-              }
-            }))
-          }
-        }
+                  lang: Language.RU,
+                },
+              },
+            })),
+          },
+        },
       })
+    }
   }
 
   /*
-  * return loaded words or ties to load them
-  * */
+   * return loaded words or ties to load them
+   * */
   public async getWords(force = false): Promise<DictionaryWord[]> {
     if (this.words.length && !force) {
       return this.words
@@ -65,17 +69,19 @@ export class Dictionary {
           translation: {
             select: {
               translationDef: true,
-            }
+            },
           },
           wordCategory: {
             select: {
-              categoryName: true
-            }
-          }
-        }
+              categoryName: true,
+            },
+          },
+        },
       })
 
-      this.categoryNames = Array.from(new Set(this.words.map(({wordCategory}) => wordCategory.categoryName))) as CategoryNames[]
+      this.categories = Array.from(
+        new Set(this.words.map(({ wordCategory }) => wordCategory.categoryName)),
+      ) as CategoryNames[]
       this.setLoadingStatus(DictionaryLoadingState.PENDING)
       return this.words
     } catch (e) {
@@ -86,6 +92,6 @@ export class Dictionary {
   }
 
   public getCategoryNames(): string[] {
-    return this.categoryNames
+    return this.categories
   }
 }

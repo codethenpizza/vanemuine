@@ -8,7 +8,10 @@
     "start": "npm run build && node dist/index.js",
     "dev": "nodemon",
     "babel-node": "babel-node --presets @babel/preset-env",
-    "build": "rm -rf ./dist && tsc --project ./ && babel dist -d dist"
+    "build": "rm -rf ./dist && tsc --project ./ && babel dist -d dist",
+    "lint:fix": "eslint --fix './src/**/*.{ts,tsx}'",
+    "lint:check": "eslint './src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "keywords": [],
   "author": "",
@@ -32,7 +35,16 @@
     "@types/node": "^14.14.25",
     "@types/node-cron": "^2.0.3",
     "@types/node-telegram-bot-api": "^0.51.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^3.2.5",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "nodemon": "^2.0.16",
+    "prettier": "^2.7.1",
     "ts-node": "^10.7.0",
     "typescript": "^4.1.5"
   }

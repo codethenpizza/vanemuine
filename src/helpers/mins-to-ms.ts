@@ -1,3 +1,1 @@
-export const minsToMs =(mins: number): number => {
-  return mins * 60 *1000
-}
+export const minsToMs = (mins: number): number => mins * 60 * 1000
