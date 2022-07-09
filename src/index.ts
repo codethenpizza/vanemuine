@@ -10,37 +10,29 @@ async function main() {
   const botController = new BotController(bot, prisma);
 
   /* General commands */
-  bot.onText(/\/marco/, async (msg) => {
+  botController.onAdminText(/\/marco/, async (msg) => {
     await botController.showDictionary(msg)
+    await botController.showCategories(msg)
     await botController.ping(msg)
   });
 
-  bot.onText(/\/add/, async (msg) => {
-    await botController.attemptAddWords(msg)
-  });
-
-  bot.onText(/\/updateSource/, async (msg) => {
+  botController.onAdminText(/\/updateSource/, async (msg) => {
     await botController.updateSource(msg)
   });
 
-  bot.onText(/\/count/, async (msg) => {
+  botController.onAdminText(/\/count/, async (msg) => {
+    // used to debug active users
     await botController.getUserListCount(msg)
     await botController.sendMsg({msg, text: `words: ${botController.dictionary.words.length}`})
   });
 
   /* Walk through dictionary */
-  bot.onText(/\/start/, async (msg) => {
-    if (msg.from?.id) {
-      await botController.getOrCreateUser(msg.from?.id)
-    }
-    await botController.sendMsg({msg, text: `Hi!`})
+  botController.onAuthText(/\/start/, async (msg) => {
+    await botController.sendMsg({msg, text: `Hi! type \/list to start the quiz`})
   });
 
   /* Games - Word List */
-  bot.onText(/\/list/, async (msg) => {
-    if (msg.from?.id) {
-      await botController.getOrCreateUser(msg.from?.id)
-    }
+  botController.onAuthText(/\/list/, async (msg) => {
     await botController.handleWordListGame(msg)
   });
 
@@ -49,9 +41,6 @@ async function main() {
       // console.log(message, data)
       if (data?.match(botController.wordListGame.name)) {
         await botController.listGameHandleAnswer(message, data)
-      }
-      if (data?.match(botController.dictionary.addAction)) {
-        await botController.addAction(message, data)
       }
 
       await botController.removeInlineMarkup(message.chat.id, message.message_id)

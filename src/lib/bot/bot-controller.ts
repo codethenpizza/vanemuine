@@ -11,43 +11,6 @@ export class BotController extends BotAuth {
     this.wordListGame = new WordListBotAdapter(prisma, this.getOrCreateUser.bind(this), this.updateUserGamesCount.bind(this))
   }
 
-  /* Add words */
-  public async attemptAddWords(msg: Message) {
-    if (!this.isAdmin(msg.from?.id)) {
-      await this.processError({msg, e: `User is not admin. Id: ${msg.from?.id}`})
-      return
-    }
-    const [word, translation] = msg.text?.replace('/add', '').trim().split(':') || []
-    const text = `Это правильно? ${word} - ${translation}`
-    await this.sendMsg({msg, text, options: {
-        reply_markup: {
-          inline_keyboard: [
-            [{text: 'Дa', callback_data: `${this.dictionary.addAction}(${word}:${translation})`}],
-            [{text: 'Нет', callback_data: `${this.dictionary.addAction}:false`}]
-          ]
-        }
-      }})
-  }
-
-  public async addAction(msg: Message, data: string) {
-    try {
-      if (!this.isAdmin(msg.chat?.id)) {
-        await this.sendMsg({msg, text: 'You are not admin, liar'})
-        return
-      }
-      if (!data || data.match(/false/)) {
-        await this.sendMsg({msg, text: 'нет так нет'})
-        return
-      }
-      const match = data.match(/\((.*)\)/)?.pop()
-      const [word, translation] = match?.split(':') || []
-      await this.dictionary.addWord(word, translation)
-      await this.sendMsg({msg, text: 'Done'})
-    } catch (e) {
-      await this.processError({msg, e})
-    }
-  }
-
   public async updateSource(msg: Message) {
     try {
       if (!this.isAdmin(msg.chat?.id)) {
@@ -63,11 +26,25 @@ export class BotController extends BotAuth {
   }
 
 
-  /* Show all dictionary */
+  /* Show all words from dictionary */
   public async showDictionary(msg: Message) {
     try {
       const words = await this.dictionary.getWords()
-      const text = words.map(({wordDef, translation}) => `${wordDef} - ${translation?.translationDef}`).join('\n')
+      const text = words.map(({
+                                wordDef,
+                                translation,
+                                wordCategory
+                              }) => `${wordDef} - ${translation?.translationDef} (${wordCategory.categoryName})`).join('\n')
+      await this.sendMsg({msg, text: `${words.length} ${text}`})
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  public async showCategories(msg: Message) {
+    try {
+      const categories = this.dictionary.getCategoryNames()
+      const text = categories.join('\n')
       await this.sendMsg({msg, text})
     } catch (e) {
       console.error(e)

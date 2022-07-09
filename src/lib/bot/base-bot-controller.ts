@@ -53,4 +53,10 @@ export class BaseBotController {
     console.error(e)
     await this.sendMsg({msg, text: textToSend || this.errorMsgTemplate})
   }
+
+  /* on receive events */
+  public onText(regexp: RegExp, callback: (msg: Message, match: RegExpExecArray | null) => Promise<any> | any): void {
+    this.bot.onText(regexp, callback)
+  }
+
 }

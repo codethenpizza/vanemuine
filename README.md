@@ -7,4 +7,4 @@ Telegram bot which helps me to learn the Estonian language with quiz game
 `prisma migrate resolve --rolled-back "migration_name"`
 
 ### Run migrations in production
-`npx prisma migrate deploy`
+`prisma migrate deploy`

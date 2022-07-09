@@ -1,56 +1,58 @@
-import {PrismaClient} from "@prisma/client";
-import {DictionaryLoadingState} from "./types";
+import {PrismaClient, Word, Translation, WordCategory} from "@prisma/client";
+import {CategoryNames, DictionaryLoadingState} from "./types";
 import {Language} from "../../types";
-import {source} from "./source";
+import { categorySource} from "./source";
 
-type DictionaryWords = { id: number, wordDef: string, translation: { translationDef: string } | null }[]
+type DictionaryWord =
+  Pick<Word, 'id' | 'wordDef'>
+  & { translation: Pick<Translation, 'translationDef'> | null, wordCategory: Pick<WordCategory, 'categoryName'> }
+
 
 export class Dictionary {
-  addAction = `addAction`
   loadingState: DictionaryLoadingState
   prisma: PrismaClient
-  words: DictionaryWords
+  words: DictionaryWord[]
+  categoryNames: CategoryNames[]
 
   constructor(prismaClient: PrismaClient) {
     this.loadingState = DictionaryLoadingState.PENDING
     this.prisma = prismaClient
     this.words = []
-  }
-
-  private isLoading(): boolean {
-    return this.loadingState === DictionaryLoadingState.LOADING
+    this.categoryNames = []
   }
 
   private setLoadingStatus(status: DictionaryLoadingState): void {
     this.loadingState = status
   }
 
+  /*
+  * update words from the source (currently from dictionary/source.ts)
+  * */
   public async updateSource(): Promise<void> {
     // TODO: add bulk create with relations
-    for (const {wordDef, translation} of source.words) {
-      await this.addWord(wordDef, translation)
-    }
-  }
-
-  public async addWord(word: string, translation: string): Promise<void> {
-    if (!word.length || !translation.length) {
-      throw new Error(`addWord error: word and translation are required`)
-    }
-    await this.prisma.word.create({
-      data: {
-        wordDef: word,
-        translation: {
-          create: {
-            translationDef: translation,
-            lang: Language.RU
+    for (const [categoryName, words] of Object.entries(categorySource))
+      await this.prisma.wordCategory.create({
+        data: {
+          categoryName,
+          words: {
+            create: words.map(({wordDef, translationDef}) => ({
+              wordDef,
+              translation: {
+                create: {
+                  translationDef,
+                  lang: Language.RU
+                }
+              }
+            }))
           }
         }
-      }
-    })
-    await this.getWords(true)
+      })
   }
 
-  public async getWords(force = false): Promise<DictionaryWords> {
+  /*
+  * return loaded words or ties to load them
+  * */
+  public async getWords(force = false): Promise<DictionaryWord[]> {
     if (this.words.length && !force) {
       return this.words
     }
@@ -64,9 +66,16 @@ export class Dictionary {
             select: {
               translationDef: true,
             }
+          },
+          wordCategory: {
+            select: {
+              categoryName: true
+            }
           }
         }
       })
+
+      this.categoryNames = Array.from(new Set(this.words.map(({wordCategory}) => wordCategory.categoryName))) as CategoryNames[]
       this.setLoadingStatus(DictionaryLoadingState.PENDING)
       return this.words
     } catch (e) {
@@ -74,5 +83,9 @@ export class Dictionary {
       this.setLoadingStatus(DictionaryLoadingState.ERROR)
       return this.words
     }
+  }
+
+  public getCategoryNames(): string[] {
+    return this.categoryNames
   }
 }

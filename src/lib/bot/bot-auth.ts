@@ -15,12 +15,9 @@ export class BotAuth extends BaseBotController {
   }
 
   public async getUserListCount(msg: Message): Promise<void> {
-    if (!this.isAdmin(msg.from?.id)) {
-      return this.processError({msg, e: `User is not admin. Id: ${msg.from?.id}`})
-    }
-    await this.sendMsg({msg, text: `${Object.keys(this.usersMap)?.length || 0}`})
+    await this.sendMsg({msg, text: `active users: ${Object.keys(this.usersMap)?.length || 0}`})
   }
-
+  //
   public async getOrCreateUser(telegramId: number): Promise<User> {
     if (this.usersMap[telegramId]) {
       return this.usersMap[telegramId]
@@ -47,6 +44,32 @@ export class BotAuth extends BaseBotController {
       return
     }
     setTimeout(() => delete this.usersMap[userId], minsToMs(180))
+  }
+
+  /*
+  * message action available only for admin user (with id from env)
+  * */
+  public onAdminText(regexp: RegExp, callback: (msg: Message, match: RegExpExecArray | null) => Promise<any>): void {
+    this.onText(regexp, ((msg, match) => {
+      if (!this.isAdmin(msg.from?.id)) {
+        this.processError({msg, e: `User is not admin. Id: ${msg.from?.id}`})
+        return
+      }
+      return callback(msg, match)
+    }))
+  }
+
+  /*
+  * message action which tris to authenticate user, but complete action even if can't.
+  * use to gather statistics
+  * */
+  public onAuthText(regexp: RegExp, callback: (msg: Message, match: RegExpExecArray | null) => Promise<any>): void {
+    this.onText(regexp, async (msg, match) => {
+      if (msg.from?.id) {
+        await this.getOrCreateUser(msg.from?.id)
+      }
+      return callback(msg, match)
+    })
   }
 
   // TODO: move somewhere to more related place
