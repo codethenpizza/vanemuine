@@ -20,7 +20,7 @@ export class BaseBotController {
 
   dictionary: Dictionary
 
-  errorMsgTemplate = 'Чет не ок'
+  errorMsgTemplate = 'something went wrong'
 
   constructor(bot: TelegramBot, prisma: PrismaClient) {
     this.bot = bot

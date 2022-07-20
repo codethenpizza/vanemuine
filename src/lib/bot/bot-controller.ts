@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { BotAuth } from './bot-auth'
 import { WordListBotAdapter } from '../games/word-list/bot-adapter'
 
+// todo: add global error catch
 export class BotController extends BotAuth {
   wordListGame: WordListBotAdapter
 

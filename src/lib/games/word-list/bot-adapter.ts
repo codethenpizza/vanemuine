@@ -37,15 +37,15 @@ export class WordListBotAdapter extends WordList {
   }
 
   private static getCorrectMsgTemplate(correctAnswer?: string): string {
-    return `✅ Все верно, ${correctAnswer} это правильный ответ!`
+    return `✅ That's correct, ${correctAnswer} - right answer!`
   }
 
   private static getIncorrectMsgTemplate(correctAnswer: string, answer?: string): string {
-    return `🌚 Упс, '${answer}' это не верно. Правильный ответ: '${correctAnswer}'`
+    return `🌚 ouch, '${answer}' that's not correct. Right Answer: '${correctAnswer}'`
   }
 
   private static getEndMsgTemplate(score: string) {
-    return `Слова закончились :C\nСкор: ${score}`
+    return `That's all :C\nScore: ${score}`
   }
 
   private async composeResponse(
