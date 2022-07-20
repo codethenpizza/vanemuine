@@ -1,7 +1,7 @@
 import { PrismaClient, Word, Translation, WordCategory } from '@prisma/client'
 import { CategoryNames, DictionaryLoadingState } from './types'
 import { Language } from '../../types'
-import { categorySource } from './source'
+import { categorySource } from '../../../source'
 
 type DictionaryWord = Pick<Word, 'id' | 'wordDef'> & {
   translation: Pick<Translation, 'translationDef'> | null
@@ -29,7 +29,7 @@ export class Dictionary {
   }
 
   /*
-   * update words from the source (currently from dictionary/source.ts)
+   * update words from the source
    * */
   public async updateSource(): Promise<void> {
     // TODO: add bulk create with relations
