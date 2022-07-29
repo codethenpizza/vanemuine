@@ -32,7 +32,7 @@ export class WordList {
     const allWords = await this.dictionary.getWords()
 
     this.translationWords = allWords
-      .map(({ translation }) => translation?.translationDef)
+      .map(({ trans }) => trans?.trans)
       .filter(Boolean)
       .sort(() => 0.5 - Math.random())
       .slice(0, this.maxQuizLength) as string[]
@@ -60,12 +60,12 @@ export class WordList {
    * populate word node with answers for quiz
    * */
   private composeNodeOptions(node: ListNode<PlayerDataWord>): ListNode<PlayerDataWord> {
-    if (!node.value.translation?.translationDef) {
+    if (!node.value.trans?.trans) {
       return node
     }
     // temporary suppress to update linked list node
     // eslint-disable-next-line no-param-reassign
-    node.value.options = this.getOptions(node.value.translation?.translationDef)
+    node.value.options = this.getOptions(node.value.trans?.trans)
     return node
   }
 

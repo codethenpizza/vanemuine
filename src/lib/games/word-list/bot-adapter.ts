@@ -63,15 +63,15 @@ export class WordListBotAdapter extends WordList {
         text: WordListBotAdapter.getEndMsgTemplate(score),
       }
     }
-    if (!node?.value.translation?.translationDef) {
+    if (!node?.value.trans?.trans) {
       return {
         text: 'упс',
       }
     }
-    const { wordDef, options } = node.value
+    const { word, options } = node.value
 
     return {
-      text: capitalize(wordDef),
+      text: capitalize(word),
       options: {
         reply_markup: {
           inline_keyboard:

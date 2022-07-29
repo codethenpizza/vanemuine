@@ -11,4 +11,6 @@ export enum CategoryNames {
   // TIME = 'time',
   MONTH = 'month',
   BASIC = 'basic',
+  PRONOUNCE = 'pronouns',
+  QUESTIONS = 'questions'
 }

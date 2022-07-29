@@ -36,8 +36,8 @@ export class BotController extends BotAuth {
       const words = await this.dictionary.getWords()
       const text = words
         .map(
-          ({ wordDef, translation, wordCategory }) =>
-            `${wordDef} - ${translation?.translationDef} (${wordCategory.categoryName})`,
+          ({ word, trans, wordCategory }) =>
+            `${word} - ${trans?.trans} (${wordCategory.categoryName})`,
         )
         .join('\n')
       await this.sendMsg({ msg, text: `${words.length} ${text}` })

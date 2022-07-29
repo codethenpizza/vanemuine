@@ -9,7 +9,7 @@ datasource db {
 
 model Translation {
   id             Int      @id @default(autoincrement())
-  translationDef String
+  trans          String
   lang           String
   word           Word     @relation(fields: [wordId], references: [id])
   wordId         Int      @unique
@@ -25,9 +25,9 @@ model WordCategory {
 
 model Word {
   id             Int          @id @default(autoincrement())
-  wordDef        String
+  word           String
   desc           String?
-  translation    Translation?
+  trans          Translation?
   wordCategory   WordCategory @relation(fields: [wordCategoryId], references: [id])
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

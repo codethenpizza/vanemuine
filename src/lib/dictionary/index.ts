@@ -3,8 +3,8 @@ import { CategoryNames, DictionaryLoadingState } from './types'
 import { Language } from '../../types'
 import { categorySource } from '../../../source'
 
-type DictionaryWord = Pick<Word, 'id' | 'wordDef'> & {
-  translation: Pick<Translation, 'translationDef'> | null
+type DictionaryWord = Pick<Word, 'id' | 'word'> & {
+  trans: Pick<Translation, 'trans'> | null
   wordCategory: Pick<WordCategory, 'categoryName'>
 }
 
@@ -38,11 +38,11 @@ export class Dictionary {
         data: {
           categoryName,
           words: {
-            create: words.map(({ wordDef, translationDef }) => ({
-              wordDef,
-              translation: {
+            create: words.map(({ word, trans }) => ({
+              word,
+              trans: {
                 create: {
-                  translationDef,
+                  trans,
                   lang: Language.RU,
                 },
               },
@@ -65,10 +65,10 @@ export class Dictionary {
       this.words = await this.prisma.word.findMany({
         select: {
           id: true,
-          wordDef: true,
-          translation: {
+          word: true,
+          trans: {
             select: {
-              translationDef: true,
+              trans: true,
             },
           },
           wordCategory: {
