@@ -28,16 +28,13 @@ export class WordList {
   /*
    * get words and create linked list for future iterations
    * */
-  public async setWordList(playerId: number): Promise<ListNode<PlayerDataWord>> {
+  public async setWordList(playerId: number, category: string): Promise<ListNode<PlayerDataWord>> {
     const allWords = await this.dictionary.getWords()
+    await this.prepareAnswerWords()
 
-    this.translationWords = allWords
-      .map(({ trans }) => trans?.trans)
-      .filter(Boolean)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, this.maxQuizLength) as string[]
-
-    const gameWords = allWords.sort(() => 0.5 - Math.random()).slice(0, this.maxQuizLength)
+    const gameWords = allWords
+      .filter(({wordCategory}) => category ? wordCategory.categoryName === category : true).sort(() => 0.5 - Math.random())
+      .slice(0, this.maxQuizLength)
 
     const list = new LinkedList(gameWords)
     await this.updateUserMetaWithWordsList(playerId, list)
@@ -54,6 +51,17 @@ export class WordList {
     }
 
     return this.updateNode(playerId, this.composeNodeOptions(node.next))
+  }
+
+  /*
+  * map through the dictionary to create random words answers
+  * */
+  private async prepareAnswerWords() {
+    const allWords = await this.dictionary.getWords()
+
+    this.translationWords = allWords
+      .map(({ trans }) => trans?.trans)
+      .sort(() => 0.5 - Math.random())
   }
 
   /*
@@ -108,6 +116,7 @@ export class WordList {
 
   /*
    * add game temporary metadata to user which stored in memory
+   * todo: move to adapter?
    * */
   private async updateUserMetaWithWordsList(
     playerId: number,
@@ -119,7 +128,6 @@ export class WordList {
       node: this.composeNodeOptions(list.firstNode),
       score: 0,
     }
-
     user.meta = {
       ...user.meta,
       [this.name]: userMeta,
@@ -132,7 +140,7 @@ export class WordList {
   private async getOrCreateUserMeta(playerId: number): Promise<UserWordListMeta> {
     const user = await this.getUser(playerId)
     if (!user.meta?.[this.name]) {
-      await this.setWordList(playerId)
+      await this.setWordList(playerId, '') // fixme: save category somewhere or drop game?
     }
     return user.meta?.[this.name] as UserWordListMeta
   }
@@ -142,7 +150,7 @@ export class WordList {
    * */
   private async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
     const userMeta = await this.getOrCreateUserMeta(playerId)
-    return userMeta.node || null
+    return userMeta?.node || null
   }
 
   /*
@@ -162,7 +170,7 @@ export class WordList {
    * */
   public async getScore(playerId: number): Promise<string> {
     const userMeta = await this.getOrCreateUserMeta(playerId)
-    return `${userMeta.score} / ${userMeta.list.length}`
+    return `${userMeta?.score} / ${userMeta?.list.length}`
   }
 
   /*

@@ -1,10 +1,10 @@
-import { PrismaClient, Word, Translation, WordCategory } from '@prisma/client'
+import { PrismaClient, Translation, Word, WordCategory } from '@prisma/client'
 import { Language } from '../../types'
 import { CategoryNames, DictionaryLoadingState } from './types'
 import { categorySource } from '../../source'
 
 type DictionaryWord = Pick<Word, 'id' | 'word'> & {
-  trans: Pick<Translation, 'trans'> | null
+  trans: Pick<Translation, 'trans'>
   wordCategory: Pick<WordCategory, 'categoryName'>
 }
 
@@ -53,15 +53,11 @@ export class Dictionary {
     }
   }
 
-  /*
-   * return loaded words or ties to load them
-   * */
-  public async getWords(force = false): Promise<DictionaryWord[]> {
-    if (this.words.length && !force) {
-      return this.words
-    }
+  private async loadSource(): Promise<void> {
     try {
       this.setLoadingStatus(DictionaryLoadingState.LOADING)
+      // todo: make word translation required on db side
+      // @ts-ignore
       this.words = await this.prisma.word.findMany({
         select: {
           id: true,
@@ -83,12 +79,32 @@ export class Dictionary {
         new Set(this.words.map(({ wordCategory }) => wordCategory.categoryName)),
       ) as CategoryNames[]
       this.setLoadingStatus(DictionaryLoadingState.PENDING)
-      return this.words
     } catch (e) {
       console.error(e)
       this.setLoadingStatus(DictionaryLoadingState.ERROR)
+    }
+  }
+
+ /*
+ * return array of CategoryNames or try to load them
+ * */
+  public async getCategories(force = false): Promise<CategoryNames[]> {
+    if (this.categories.length && !force) {
+      return this.categories
+    }
+    await this.loadSource()
+    return this.categories
+  }
+
+  /*
+   * return loaded words or tries to load them
+   * */
+  public async getWords(force = false): Promise<DictionaryWord[]> {
+    if (this.words.length && !force) {
       return this.words
     }
+    await this.loadSource()
+    return this.words
   }
 
   public getCategoryNames(): string[] {

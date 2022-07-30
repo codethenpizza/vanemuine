@@ -33,14 +33,13 @@ async function main() {
 
   /* Games - Word List */
   botController.onAuthText(/\/list/, async (msg) => {
-    await botController.handleWordListGame(msg)
+    await botController.wordListGame.startGame(msg)
   })
 
   bot.on('callback_query', async ({ message, data }) => {
     if (message) {
-      // console.log(message, data)
       if (data?.match(botController.wordListGame.name)) {
-        await botController.listGameHandleAnswer(message, data)
+        await botController.wordListGame.handleAnswer(message, data)
       }
 
       await botController.removeInlineMarkup(message.chat.id, message.message_id)

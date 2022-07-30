@@ -13,6 +13,8 @@ export class BotController extends BotAuth {
       prisma,
       this.getOrCreateUser.bind(this),
       this.updateUserGamesCount.bind(this),
+      this.sendMsg.bind(this),
+      this.processError.bind(this)
     )
   }
 
@@ -54,29 +56,5 @@ export class BotController extends BotAuth {
     } catch (e) {
       console.error(e)
     }
-  }
-
-  /* Word list game */
-  public async handleWordListGame(msg: Message) {
-    try {
-      if (msg.text?.match('/list')) {
-        const resp = await this.wordListGame.startGame(msg.chat.id)
-        await this.sendMsg({ msg, ...resp })
-      }
-    } catch (e) {
-      await this.processError({ msg, e })
-    }
-  }
-
-  public async listGameHandleAnswer(msg: Message, answer?: string): Promise<void> {
-    if (!msg.from?.id) {
-      await this.processError({ msg, e: 'listGameHandleAnswer: msg.from?.id empty' })
-      return
-    }
-
-    const text = await this.wordListGame.processAnswer(msg.chat?.id, answer)
-    await this.sendMsg({ msg, text })
-    const nextStep = await this.wordListGame.getGameNextStep(msg.chat.id)
-    await this.sendMsg({ msg, ...nextStep })
   }
 }
