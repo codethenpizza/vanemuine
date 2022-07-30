@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import TelegramBot from 'node-telegram-bot-api'
-import getBot from './lib/bot/bot-init'
-import { BotController } from './lib/bot/bot-controller'
+import { BotController } from './services/bot/bot-controller'
+import getBot from './services/bot/bot-init'
 
 const prisma = new PrismaClient()
 

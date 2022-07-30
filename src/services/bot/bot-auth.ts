@@ -1,8 +1,8 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { PrismaClient } from '@prisma/client'
-import { BaseBotController } from './base-bot-controller'
 import { Language, User } from '../../types'
-import { minsToMs } from '../../helpers/mins-to-ms'
+import { minsToMs } from '../../lib/helpers/mins-to-ms'
+import { BaseBotController } from './base-bot-controller'
 
 export class BotAuth extends BaseBotController {
   prisma: PrismaClient

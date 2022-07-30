@@ -11,4 +11,5 @@ dist
 *.njsproj
 *.sln
 *.sw?
-/source/
+/src/source/most-common-est-en.json
+/source-draft.ts

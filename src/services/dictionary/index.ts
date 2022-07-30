@@ -1,7 +1,7 @@
 import { PrismaClient, Word, Translation, WordCategory } from '@prisma/client'
-import { CategoryNames, DictionaryLoadingState } from './types'
 import { Language } from '../../types'
-import { categorySource } from '../../../source'
+import { CategoryNames, DictionaryLoadingState } from './types'
+import { categorySource } from '../../source'
 
 type DictionaryWord = Pick<Word, 'id' | 'word'> & {
   trans: Pick<Translation, 'trans'> | null

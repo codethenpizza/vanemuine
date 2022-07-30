@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client'
+import { capitalize } from '../../../lib/helpers/capitalize'
+import { User } from '../../../types'
 import { SendMsgArgs } from '../../bot/base-bot-controller'
 import { WordList } from './index'
-import { capitalize } from '../../../helpers/capitalize'
 import { UserWordListMeta } from './types'
-import { User } from '../../../types'
 
 export class WordListBotAdapter extends WordList {
   onGameEnd: (playerId: number) => Promise<void>

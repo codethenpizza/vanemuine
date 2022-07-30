@@ -1,7 +1,7 @@
 import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
 import { PrismaClient } from '@prisma/client'
 import { Dictionary } from '../dictionary'
-import { config } from '../config'
+import { config } from '../../config'
 
 export type SendMsgArgs = {
   msg: Message

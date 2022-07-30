@@ -9,19 +9,53 @@
     "experimentalDecorators": true,
     "target": "es6",
     "module": "commonjs",
-    "lib": ["es6"],                           /* Specify library files to be included in the compilation. */
+    "lib": [
+      "es6"
+    ],
+    /* Specify library files to be included in the compilation. */
     "allowJs": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "baseUrl": "./src/",
-    "outDir": "dist",                        /* Redirect output structure to the directory. */
-    "strict": true,                           /* Enable all strict type-checking options. */
-    "noImplicitAny": true,                    /* Raise error on expressions and declarations with an implied 'any' type. */
-    "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
-    "skipLibCheck": true,                     /* Skip type checking of declaration files. */
-    "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
+    "outDir": "dist",
+    /* Redirect output structure to the directory. */
+    "strict": true,
+    /* Enable all strict type-checking options. */
+    "noImplicitAny": true,
+    /* Raise error on expressions and declarations with an implied 'any' type. */
+    "esModuleInterop": true,
+    /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
+    "skipLibCheck": true,
+    /* Skip type checking of declaration files. */
+    "forceConsistentCasingInFileNames": true,
+    /* Disallow inconsistently-cased references to the same file. */
+    // todo: add paths resolve with tsconfig-paths/tsc-alias or something similar
+//    "paths": {
+//      "@config": [
+//        "./config"
+//      ],
+//      "@types": [
+//        "./types"
+//      ],
+//      "@types/*": [
+//        "./types/*"
+//      ],
+//      "@services": [
+//        "./services"
+//      ],
+//      "@services/*": [
+//        "./services/*"
+//      ],
+//      "@helpers/*": [
+//        "./lib/helpers/*"
+//      ]
+//    }
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

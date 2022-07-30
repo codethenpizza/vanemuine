@@ -1,5 +1,5 @@
+import { LinkedList, ListNode } from '../../../lib/helpers/linked-list'
 import { Dictionary } from '../../dictionary'
-import { LinkedList, ListNode } from '../../../helpers/linked-list'
 
 export type RandomAnswer = {
   text: string

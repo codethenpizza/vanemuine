@@ -1,5 +1,5 @@
-import { envFromNodeEnv, numberFromEnv, stringFromEnv } from '../../helpers/congif'
-import { Env } from '../../types'
+import { Env } from '../types'
+import { envFromNodeEnv, numberFromEnv, stringFromEnv } from '../lib/helpers/config'
 
 export type Config = {
   env: Env

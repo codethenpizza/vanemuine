@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client'
+import { User } from 'types'
+import { LinkedList, ListNode } from '../../../lib/helpers/linked-list'
+import { capitalize } from '../../../lib/helpers/capitalize'
 import { Dictionary } from '../../dictionary'
-import { LinkedList, ListNode } from '../../../helpers/linked-list'
-import { capitalize } from '../../../helpers/capitalize'
 import { PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes } from './types'
-import { User } from '../../../types'
 
 export class WordList {
   dictionary: Dictionary
