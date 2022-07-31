@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { Message } from 'node-telegram-bot-api'
+import { InlineKeyboardButton, Message } from 'node-telegram-bot-api'
 import { capitalize } from '../../../lib/helpers/capitalize'
 import { User } from '../../../types'
 import { ProcessErrorArgs, SendMsgArgs } from '../../bot/base-bot-controller'
@@ -19,7 +19,7 @@ export class WordListBotAdapter extends WordList {
     getUser: (telegramId: User['telegramId']) => Promise<User>,
     onGameEnd: (playerId: number) => Promise<void>,
     sendMsg: (args: SendMsgArgs) => Promise<void>,
-    processError: (args: ProcessErrorArgs) => Promise<void>
+    processError: (args: ProcessErrorArgs) => Promise<void>,
   ) {
     super(prisma, getUser)
     this.onGameEnd = onGameEnd
@@ -29,7 +29,7 @@ export class WordListBotAdapter extends WordList {
 
   public async startGame(msg: Message): Promise<void> {
     const msgCats = await this.getCategories()
-    await this.sendMsg({ msg, ...msgCats})
+    await this.sendMsg({ msg, ...msgCats })
 
   }
 
@@ -61,17 +61,22 @@ export class WordListBotAdapter extends WordList {
   private async getCategories(): Promise<Omit<SendMsgArgs, 'msg'>> {
     const categories = await this.dictionary.getCategories()
 
+    const options: InlineKeyboardButton[][] = categories?.map((category) => [
+      {
+        text: CategoryFriendlyNames[category],
+        callback_data: `${this.name}:cat:${category}`,
+      },
+    ]) || []
+    options.push([{
+      text: 'Random',
+      callback_data: `${this.name}:cat:`,
+    }])
+
     return {
       text: capitalize('Please, pick category'),
       options: {
         reply_markup: {
-          inline_keyboard:
-            categories?.map(( category) => [
-              {
-                text: CategoryFriendlyNames[category],
-                callback_data: `${this.name}:cat:${category}`,
-              },
-            ]) || [],
+          inline_keyboard: options,
         },
       },
     }
@@ -80,13 +85,13 @@ export class WordListBotAdapter extends WordList {
   private async getFirstStep(playerId: number, category: string, msg: Message): Promise<void> {
     const node = await this.setWordList(playerId, category)
     const answer = await this.composeResponse(node, playerId)
-    return this.sendMsg({msg, ...answer})
+    return this.sendMsg({ msg, ...answer })
   }
 
   private async getGameNextStep(playerId: number, msg: Message): Promise<void> {
     const node = await this.getNext(playerId)
     const nextStep = await this.composeResponse(node, playerId)
-    await this.sendMsg({msg, ...nextStep })
+    await this.sendMsg({ msg, ...nextStep })
   }
 
   private async processAnswer(playerId: number, msg: Message, answer?: string): Promise<void> {
@@ -107,7 +112,7 @@ export class WordListBotAdapter extends WordList {
   }
 
   private static getEndMsgTemplate(score: string) {
-    return `That's all :C\nScore: ${score}`
+    return `That's all :C Thank you for playing! \nScore: ${score}`
   }
 
   private async composeResponse(
@@ -127,7 +132,7 @@ export class WordListBotAdapter extends WordList {
     }
     if (!node?.value.trans?.trans) {
       return {
-        text: 'упс',
+        text: 'ouch',
       }
     }
     const { word, options } = node.value
