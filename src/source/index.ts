@@ -5,10 +5,10 @@ type WordSource = { trans: string } & Pick<Word, 'word'>
 type CategorySource = Record<CategoryNames, WordSource[]>
 
 export const categorySource: CategorySource = {
-  [CategoryNames.BASIC]: [
+  [CategoryNames.GENERAL]: [
     {
       word: 'aitäh',
-      trans: 'thank you',
+      trans: 'thank',
     },
     {
       word: 'palun',
@@ -22,6 +22,51 @@ export const categorySource: CategorySource = {
       word: 'kuidas läheb?',
       trans: 'how are you?',
     },
+    {
+      word: 'hästi',
+      trans: 'well',
+    },
+    {
+      word: 'nii',
+      trans: 'so',
+    },
+    {
+      word: 'vaata',
+      trans: 'see',
+    },
+    {
+      word: 'ei',
+      trans: 'no',
+    },
+    {
+      word: 'jah',
+      trans: 'yes',
+    },
+    {
+      word: 'võib-olla',
+      trans: 'perhaps',
+    },
+    {
+      word: 'avatud',
+      trans: 'open',
+    },
+    {
+      word: 'muusika',
+      trans: 'music',
+    },
+    {
+      word: 'kuum',
+      trans: 'hot',
+    },
+    {
+      word: 'külm',
+      trans: 'cold',
+    },
+    {
+      word: 'oht',
+      trans: 'danger',
+    },
+
   ],
   [CategoryNames.FOOD]: [
     {
@@ -48,8 +93,28 @@ export const categorySource: CategorySource = {
       word: 'vorst',
       trans: 'sausage',
     },
+    {
+      word: 'kala',
+      trans: 'fish',
+    },
+    {
+      word: 'piim',
+      trans: 'milk',
+    },
+    {
+      word: 'suhkur',
+      trans: 'sugar',
+    },
+    {
+      word: 'soola',
+      trans: 'salt',
+    },
   ],
   [CategoryNames.ANIMALS]: [
+    {
+      word: 'loomade',
+      trans: 'animal',
+    },
     {
       word: 'kass',
       trans: 'cat',
@@ -57,6 +122,46 @@ export const categorySource: CategorySource = {
     {
       word: 'koer',
       trans: 'dog',
+    },
+    {
+      word: 'hobune',
+      trans: 'horse',
+    },
+    {
+      word: 'rott',
+      trans: 'rat',
+    },
+    {
+      word: 'hirved',
+      trans: 'deer',
+    },
+    {
+      word: 'hirved',
+      trans: 'deer',
+    },
+    {
+      word: 'tuhkur',
+      trans: 'ferret',
+    },
+    {
+      word: 'papagoi',
+      trans: 'parrot',
+    },
+    {
+      word: 'küülik',
+      trans: 'rabbit',
+    },
+    {
+      word: 'kilpkonn',
+      trans: 'turtle',
+    },
+    {
+      word: 'ämblik',
+      trans: 'spider',
+    },
+    {
+      word: 'madu',
+      trans: 'snake',
     },
   ],
   [CategoryNames.DAYS_OF_WEEK]: [
@@ -87,6 +192,18 @@ export const categorySource: CategorySource = {
     {
       word: 'pühapäev',
       trans: 'sunday',
+    },
+    {
+      word: 'nädal',
+      trans: 'week',
+    },
+    {
+      word: 'nädalavahetusel',
+      trans: 'weekend',
+    },
+    {
+      word: 'nädalapäevad',
+      trans: 'weekdays',
     },
   ],
   [CategoryNames.MONTH]: [
@@ -138,6 +255,11 @@ export const categorySource: CategorySource = {
       word: 'detsember',
       trans: 'december',
     },
+    {
+      word: 'kuu',
+      trans: 'month',
+    },
+    // add seasons
   ],
   [CategoryNames.PRONOUNCE]: [
     {
