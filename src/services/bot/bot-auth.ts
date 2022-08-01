@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { Language, User } from '../../types'
 import { minsToMs } from '../../lib/helpers/mins-to-ms'
 import { BaseBotController } from './base-bot-controller'
+import { config } from '../../config'
 
 export class BotAuth extends BaseBotController {
   prisma: PrismaClient
@@ -36,6 +37,8 @@ export class BotAuth extends BaseBotController {
       },
     })
     this.usersMap[user.telegramId] = user as User
+    // eslint-disable-next-line no-console
+    console.log(`set in memory user with id ${telegramId}. Date: ${new Date()}`, this.usersMap[user.telegramId])
     this.removeUser(telegramId)
     return user as User
   }
@@ -45,7 +48,11 @@ export class BotAuth extends BaseBotController {
       delete this.usersMap[userId]
       return
     }
-    setTimeout(() => delete this.usersMap[userId], minsToMs(180))
+    setTimeout(() => {
+      // eslint-disable-next-line no-console
+      console.log(`remove user with id ${userId} because of AFK. Date: ${new Date()}`, this.usersMap[userId])
+      delete this.usersMap[userId]
+    }, minsToMs(config.auth.timeBeforeAfk))
   }
 
   /*

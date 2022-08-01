@@ -28,12 +28,16 @@ async function main() {
 
   /* Walk through dictionary */
   botController.onAuthText(/\/start/, async (msg) => {
-    await botController.sendMsg({ msg, text: 'Hi! type /list to start the quiz' })
+    await botController.sendMsg({ msg, text: 'Hi! type /list to start the quiz\n (this still beta, if you will get an errors please type /log so I can fix that)' })
   })
 
   /* Games - Word List */
   botController.onAuthText(/\/list/, async (msg) => {
     await botController.wordListGame.startGame(msg)
+  })
+
+  botController.onAuthText(/\/log/, async (msg) => {
+    await botController.wordListGame.logPlayerData(msg)
   })
 
   bot.on('callback_query', async ({ message, data }) => {

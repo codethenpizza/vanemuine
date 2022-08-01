@@ -9,6 +9,9 @@ export type Config = {
     url: string
     adminId: number
   }
+  auth: {
+    timeBeforeAfk: number
+  }
 }
 
 export const config: Config = {
@@ -19,4 +22,7 @@ export const config: Config = {
     port: numberFromEnv(process.env.BOT_PORT) || 433,
     adminId: numberFromEnv(process.env.ADMIN_TELEGRAM_ID),
   },
+  auth: {
+    timeBeforeAfk: 300
+  }
 }

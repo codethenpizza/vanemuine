@@ -137,10 +137,11 @@ export class WordList {
   /*
    * create metadata if user was removed from memory because of long afk
    * */
-  private async getOrCreateUserMeta(playerId: number): Promise<UserWordListMeta> {
+  private async getUserMeta(playerId: number): Promise<Nullable<UserWordListMeta>> {
     const user = await this.getUser(playerId)
     if (!user.meta?.[this.name]) {
-      await this.setWordList(playerId, '') // fixme: save category somewhere or drop game?
+      // await this.setWordList(playerId, '') // fixme: save category somewhere or drop game?
+      return null
     }
     return user.meta?.[this.name] as UserWordListMeta
   }
@@ -149,7 +150,7 @@ export class WordList {
    * get current step of the game
    * */
   private async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
-    const userMeta = await this.getOrCreateUserMeta(playerId)
+    const userMeta = await this.getUserMeta(playerId)
     return userMeta?.node || null
   }
 
@@ -160,16 +161,23 @@ export class WordList {
     playerId: number,
     node: ListNode<PlayerDataWord>,
   ): Promise<Nullable<ListNode<PlayerDataWord>>> {
-    const userMeta = await this.getOrCreateUserMeta(playerId)
+    const userMeta = await this.getUserMeta(playerId)
+    if (!userMeta) {
+      return null
+    }
     userMeta.node = node
     return node
   }
 
   /*
-   * get user score of current game
+   * get a user score of current game
    * */
   public async getScore(playerId: number): Promise<string> {
-    const userMeta = await this.getOrCreateUserMeta(playerId)
+    const userMeta = await this.getUserMeta(playerId)
+
+    if (!userMeta) {
+      return `looks like game was dropped because of long timout :C`
+    }
     return `${userMeta?.score} / ${userMeta?.list.length}`
   }
 
@@ -177,7 +185,10 @@ export class WordList {
    * update user score of current game
    * */
   private async updateScore(playerId: number): Promise<number> {
-    const userMeta = await this.getOrCreateUserMeta(playerId)
+    const userMeta = await this.getUserMeta(playerId)
+    if (!userMeta) {
+      return 0
+    }
     userMeta.score = ++userMeta.score
     return userMeta.score
   }

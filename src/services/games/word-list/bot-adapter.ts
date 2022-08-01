@@ -152,4 +152,21 @@ export class WordListBotAdapter extends WordList {
       },
     }
   }
+
+  // todo: add logger service
+  public async logPlayerData(msg: Message): Promise<void> {
+    const playerId = msg.from?.id
+    if (!playerId) {
+      // eslint-disable-next-line no-console
+      console.log('logPlayerData: no id', msg)
+      return
+    }
+
+    const user = await this.getUser(playerId)
+    // eslint-disable-next-line no-console
+    console.log('logPlayerData', JSON.stringify({from: msg, user} || {}, undefined, 2))
+    // I know, I know, but this is for users fun
+    const text = `(ﾉ◕ヮ◕)ﾉ*:･ﾟ Data logged for your id: ${playerId}`
+    await this.sendMsg({msg, text})
+  }
 }
