@@ -1,11 +1,10 @@
-import { PrismaClient } from '@prisma/client'
 import { InlineKeyboardButton, Message } from 'node-telegram-bot-api'
 import { capitalize } from '../../../lib/helpers/capitalize'
-import { User } from '../../../types'
+import { TelegramId } from '../../../types'
 import { ProcessErrorArgs, SendMsgArgs } from '../../bot/base-bot-controller'
 import { WordList } from './index'
 import { UserWordListMeta } from './types'
-import { CategoryFriendlyNames } from '../../dictionary/types'
+import { Context } from '../../../context/types'
 
 export class WordListBotAdapter extends WordList {
   onGameEnd: (playerId: number) => Promise<void>
@@ -14,21 +13,26 @@ export class WordListBotAdapter extends WordList {
 
   processError: (args: ProcessErrorArgs) => Promise<void>
 
+  ut: Context['ut']
+
+  userStorage: Context['userStorage']
+
   constructor(
-    prisma: PrismaClient,
-    getUser: (telegramId: User['telegramId']) => Promise<User>,
+    ctx: Context,
     onGameEnd: (playerId: number) => Promise<void>,
     sendMsg: (args: SendMsgArgs) => Promise<void>,
     processError: (args: ProcessErrorArgs) => Promise<void>,
   ) {
-    super(prisma, getUser)
+    super(ctx)
     this.onGameEnd = onGameEnd
     this.sendMsg = sendMsg
     this.processError = processError
+    this.ut = ctx.ut
+    this.userStorage = ctx.userStorage
   }
 
   public async startGame(msg: Message): Promise<void> {
-    const msgCats = await this.getCategories()
+    const msgCats = await this.getCategories(msg.chat?.id)
     await this.sendMsg({ msg, ...msgCats })
 
   }
@@ -58,22 +62,27 @@ export class WordListBotAdapter extends WordList {
     await this.getGameNextStep(playerId, msg)
   }
 
-  private async getCategories(): Promise<Omit<SendMsgArgs, 'msg'>> {
+  // todo: add multilingual support
+  private async getCategories(telegramId: TelegramId): Promise<Omit<SendMsgArgs, 'msg'>> {
     const categories = await this.dictionary.getCategories()
-
-    const options: InlineKeyboardButton[][] = categories?.map((category) => [
+    const lng = await this.userStorage.getUserLocale(telegramId)
+    const options: InlineKeyboardButton[][] = categories?.map(({categoryName, trans}) => [
       {
-        text: CategoryFriendlyNames[category],
-        callback_data: `${this.name}:cat:${category}`,
+        text: trans[lng] || '',
+        callback_data: `${this.name}:cat:${categoryName}`,
       },
     ]) || []
+
+    const randomCatName = await this.ut({key: 'quiz:random', telegramId })
     options.push([{
-      text: 'Random',
+      text: randomCatName,
       callback_data: `${this.name}:cat:`,
     }])
 
+    const text = capitalize(await this.ut({key: 'quiz:pickCategory', telegramId }))
+
     return {
-      text: capitalize('Please, pick category'),
+      text,
       options: {
         reply_markup: {
           inline_keyboard: options,
@@ -98,39 +107,46 @@ export class WordListBotAdapter extends WordList {
     const [, option] = answer?.split(':') || []
     const { correctAnswer, isCorrect } = await this.verifyAnswer(playerId, option)
     if (isCorrect) {
-      return this.sendMsg({ msg, text: WordListBotAdapter.getCorrectMsgTemplate(option) })
+      const text = await this.getCorrectMsgTemplate(msg.chat.id, option)
+      return this.sendMsg({ msg, text })
     }
-    return this.sendMsg({ msg, text: WordListBotAdapter.getIncorrectMsgTemplate(correctAnswer, option) })
+    const text = await this.getIncorrectMsgTemplate(msg.chat.id, correctAnswer, option)
+    return this.sendMsg({ msg, text })
   }
 
-  private static getCorrectMsgTemplate(correctAnswer?: string): string {
-    return `✅ That's correct, ${correctAnswer} - right answer!`
+  private async getCorrectMsgTemplate(telegramId: TelegramId, correctAnswer?: string): Promise<string> {
+    const msg = await this.ut({key: 'quiz:correct',options: { correctAnswer }, telegramId})
+    return `✅ ${msg}`
   }
 
-  private static getIncorrectMsgTemplate(correctAnswer: string, answer?: string): string {
-    return `🌚 ouch, '${answer}' that's not correct. Right Answer: '${correctAnswer}'`
+  private async getIncorrectMsgTemplate(telegramId: TelegramId, correctAnswer: string, answer?: string): Promise<string> {
+    const msg = await this.ut({key: 'quiz:incorrect',options: { correctAnswer, answer }, telegramId})
+    return `🌚 ${msg}`
   }
 
-  private static getEndMsgTemplate(score: string) {
-    return `That's all :C Thank you for playing! \nScore: ${score}`
+  private async getEndMsgTemplate(telegramId: TelegramId, score: string): Promise<string> {
+    const msg = await this.ut({key: 'quiz:incorrect', options: { score }, telegramId})
+    return `${msg}`
   }
 
   private async composeResponse(
     node: UserWordListMeta['node'] | null,
-    playerId: number,
+    telegramId: TelegramId,
   ): Promise<Omit<SendMsgArgs, 'msg'>> {
     if (!node) {
-      const score = await this.getScore(playerId)
+      const score = await this.getScore(telegramId)
 
       // ignore this promise because it's only gather analytics and not necessary
       // TODO: move somewhere so user can get score before analytics update
-      this.onGameEnd(playerId)
+      await this.onGameEnd(telegramId)
 
       return {
-        text: WordListBotAdapter.getEndMsgTemplate(score),
+        text: await this.getEndMsgTemplate(telegramId, score),
       }
     }
-    if (!node?.value.trans?.trans) {
+
+    const lng = await this.userStorage.getUserLocale(telegramId)
+    if (!node?.value.trans?.[lng]) {
       return {
         text: 'ouch',
       }
@@ -162,7 +178,7 @@ export class WordListBotAdapter extends WordList {
       return
     }
 
-    const user = await this.getUser(playerId)
+    const user = await this.userStorage.getOrCreateUser(playerId)
     // eslint-disable-next-line no-console
     console.log('logPlayerData', JSON.stringify({from: msg, user} || {}, undefined, 2))
     // I know, I know, but this is for users fun

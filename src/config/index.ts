@@ -1,18 +1,7 @@
-import { Env } from '../types'
 import { envFromNodeEnv, numberFromEnv, stringFromEnv } from '../lib/helpers/config'
+import { Config } from './types'
 
-export type Config = {
-  env: Env
-  bot: {
-    token: string
-    port: number
-    url: string
-    adminId: number
-  }
-  auth: {
-    timeBeforeAfk: number
-  }
-}
+require('dotenv').config()
 
 export const config: Config = {
   env: envFromNodeEnv(process.env.NODE_ENV),
@@ -23,6 +12,6 @@ export const config: Config = {
     adminId: numberFromEnv(process.env.ADMIN_TELEGRAM_ID),
   },
   auth: {
-    timeBeforeAfk: 300
+    userInMemoryLifeTime: 300
   }
 }

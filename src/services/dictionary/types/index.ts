@@ -1,3 +1,6 @@
+import { Lang, Translation, Word, WordCategory, WordCategoryTrans } from '@prisma/client'
+import { TransLanguage } from '../../../types'
+
 export enum DictionaryLoadingState {
   PENDING = 'pending',
   LOADING = 'loading',
@@ -15,17 +18,26 @@ export enum CategoryNames {
   QUESTIONS = 'questions'
 }
 
-export const CategoryFriendlyNames: Record<CategoryNames, string> = {
-  [CategoryNames.ANIMALS]: 'Animals',
-  [CategoryNames.DAYS_OF_WEEK]: 'Days Of Week',
-  [CategoryNames.FOOD]: 'Food',
-  [CategoryNames.MONTH]: 'Months',
-  [CategoryNames.GENERAL]: 'General',
-  [CategoryNames.PRONOUNCE]: 'Pronouns',
-  [CategoryNames.QUESTIONS]: 'Questions'
-  /*
-  * family
-  * time
-  * seasons?
-  * */
+export type DictionaryTrans = Record<Lang['name'], Translation['trans']>
+
+export type DBCategory = {
+  name: Pick<WordCategory, 'categoryName'>,
+  wordCategoryTrans: {
+    name: Pick<WordCategoryTrans, 'name'>
+    lng: Pick<Lang, 'name'>
+  }[]
 }
+
+export type DictionaryCategoryTrans = Partial<Record<TransLanguage, Extract<WordCategoryTrans, 'name'>>>
+
+export type DictionaryCategory = Pick<WordCategory, 'categoryName'>
+  & {
+  trans: DictionaryCategoryTrans
+}
+
+
+export type DictionaryWord = Pick<Word, 'id' | 'word'> & {
+  trans: DictionaryTrans
+  wordCategory: DictionaryCategory
+}
+

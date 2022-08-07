@@ -8,7 +8,8 @@ type BotOptionsType = {
   port?: number | string
 }
 
-const initBot = async () => {
+export const initBot = async (): Promise<TelegramBot> => {
+  try {
   // general options
   const botOptions: BotOptionsType = {
     polling: true,
@@ -21,15 +22,8 @@ const initBot = async () => {
   const bot: TelegramBot = new TelegramBot(token, botOptions)
   await bot.setWebHook(`${url}/bot${token}`, { allowed_updates: ['poll_answer'] })
   return bot
-}
-
-const getBot = async (): Promise<TelegramBot> => {
-  try {
-    return initBot()
   } catch (e) {
     console.error(e)
     throw process.exit(1)
   }
 }
-
-export default getBot

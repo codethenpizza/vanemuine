@@ -1,60 +1,78 @@
-import { PrismaClient } from '@prisma/client'
-import TelegramBot from 'node-telegram-bot-api'
 import { BotController } from './services/bot/bot-controller'
-import getBot from './services/bot/bot-init'
+import { createContext } from './context'
 
-const prisma = new PrismaClient()
+// todo: fix multiply calls of user storage set
 
 async function main() {
-  const bot: TelegramBot = await getBot()
-  const botController = new BotController(bot, prisma)
+  const ctx = await createContext()
+  const botController = new BotController(ctx)
 
-  /* General commands */
-  botController.onAdminText(/\/marco/, async (msg) => {
-    await botController.showDictionary(msg)
-    await botController.showCategories(msg)
-    await botController.ping(msg)
-  })
+  try {
+    /* General commands */
+    botController.onAdminText(/\/marco/, async (msg) => {
+      await botController.showDictionary(msg)
+      await botController.showCategories(msg)
+      await botController.ping(msg)
+    })
 
-  botController.onAdminText(/\/updateSource/, async (msg) => {
-    await botController.updateSource(msg)
-  })
+    botController.onAdminText(/\/count/, async (msg) => {
+      // used to debug active users
+      const activeUsers = botController.userStorage.getUsersInMemoryCount()
+      await botController.sendMsg({ msg, text: `active users: ${activeUsers}` })
+    })
 
-  botController.onAdminText(/\/count/, async (msg) => {
-    // used to debug active users
-    await botController.getUserListCount(msg)
-    await botController.sendMsg({ msg, text: `words: ${botController.dictionary.words.length}` })
-  })
+    /* Walk through dictionary */
+    botController.onAuthText(/\/start/, async (msg) => {
+      const { id: telegramId } = msg.chat
+      const values = await Promise.all([
+        ctx.ut({ key: 'common:greeting', telegramId }),
+        ctx.ut({ key: 'commands:listDesk', telegramId }),
+        ctx.ut({ key: 'commands:lngUpdate', telegramId }),
+        ctx.ut({ key: 'common:betaNote', telegramId }),
+      ])
+      const text = values.join('\n')
+      await botController.sendMsg({
+        msg,
+        text,
+      })
+    })
 
-  /* Walk through dictionary */
-  botController.onAuthText(/\/start/, async (msg) => {
-    await botController.sendMsg({ msg, text: 'Hi! type /list to start the quiz\n (this still beta, if you will get an errors please type /log so I can fix that)' })
-  })
+    /* Games - Word List */
+    botController.onAuthText(/\/list/, async (msg) => {
+      await botController.wordListGame.startGame(msg)
+    })
 
-  /* Games - Word List */
-  botController.onAuthText(/\/list/, async (msg) => {
-    await botController.wordListGame.startGame(msg)
-  })
+    botController.onAuthText(/\/log/, async (msg) => {
+      await botController.wordListGame.logPlayerData(msg)
+    })
 
-  botController.onAuthText(/\/log/, async (msg) => {
-    await botController.wordListGame.logPlayerData(msg)
-  })
+    botController.onAuthText(/\/lng/, async (msg) => {
+      await botController.requestLangUpdate(msg)
+    })
 
-  bot.on('callback_query', async ({ message, data }) => {
-    if (message) {
-      if (data?.match(botController.wordListGame.name)) {
-        await botController.wordListGame.handleAnswer(message, data)
+    ctx.bot.on('callback_query', async ({ message, data }) => {
+      if (message) {
+        if (data?.match(botController.wordListGame.name)) {
+          await botController.wordListGame.handleAnswer(message, data)
+        }
+
+        if (data?.match(`${botController.lngUpdate}`)) {
+          await botController.updateUserLanguage(message, data)
+        }
+
+        await botController.removeInlineMarkup(message.chat.id, message.message_id)
       }
-
-      await botController.removeInlineMarkup(message.chat.id, message.message_id)
-    }
-  })
+    })
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('global catch', e)
+    ctx.prisma.$disconnect()
+  } finally {
+    ctx.prisma.$disconnect()
+  }
 }
 
 main()
   .catch((e) => {
     throw e
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
   })

@@ -8,37 +8,58 @@ datasource db {
 }
 
 model Translation {
-  id             Int      @id @default(autoincrement())
-  trans          String
-  lang           String
-  word           Word     @relation(fields: [wordId], references: [id])
-  wordId         Int      @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  trans     String
+  lngId     Int
+  lng       Lang     @relation(fields: [lngId], references: [id])
+  wordId    Int
+  word      Word     @relation(fields: [wordId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model WordCategory {
-  id           Int    @id @default(autoincrement())
-  categoryName String
-  words        Word[]
+  id                Int                 @id @default(autoincrement())
+  // do I need to keep name?
+  categoryName      String              @unique
+  words             Word[]
+  wordCategoryTrans WordCategoryTrans[]
+}
+
+model WordCategoryTrans {
+  id             Int          @id @default(autoincrement())
+  name           String       @unique // make required?
+  lngId          Int
+  lng            Lang         @relation(fields: [lngId], references: [id])
+  wordCategoryId Int
+  wordCategory   WordCategory @relation(fields: [wordCategoryId], references: [id])
 }
 
 model Word {
-  id             Int          @id @default(autoincrement())
-  word           String
+  id             Int           @id @default(autoincrement())
+  word           String        @unique
   desc           String?
-  trans          Translation?
-  wordCategory   WordCategory @relation(fields: [wordCategoryId], references: [id])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  trans          Translation[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   wordCategoryId Int
+  wordCategory   WordCategory  @relation(fields: [wordCategoryId], references: [id])
 }
 
 model User {
   id          Int      @id @default(autoincrement())
   telegramId  Int      @unique
   gamesPlayed Int      @default(0)
-  lng         String
+  lngId       Int
+  lng         Lang     @relation(fields: [lngId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Lang {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  users             User[]
+  translations      Translation[]
+  WordCategoryTrans WordCategoryTrans[]
 }

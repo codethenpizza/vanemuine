@@ -1,35 +1,20 @@
-import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { PrismaClient } from '@prisma/client'
+import { Message } from 'node-telegram-bot-api'
 import { BotAuth } from './bot-auth'
 import { WordListBotAdapter } from '../games/word-list/bot-adapter'
+import { Context } from '../../context/types'
 
 // todo: add global error catch
 export class BotController extends BotAuth {
   wordListGame: WordListBotAdapter
 
-  constructor(bot: TelegramBot, prisma: PrismaClient) {
-    super(bot, prisma)
+  constructor(ctx: Context) {
+    super(ctx)
     this.wordListGame = new WordListBotAdapter(
-      prisma,
-      this.getOrCreateUser.bind(this),
-      this.updateUserGamesCount.bind(this),
+      ctx,
+      this.userStorage.updateUserGamesCount.bind(this),
       this.sendMsg.bind(this),
-      this.processError.bind(this)
+      this.processError.bind(this),
     )
-  }
-
-  public async updateSource(msg: Message) {
-    try {
-      if (!BotAuth.isAdmin(msg.chat?.id)) {
-        await this.sendMsg({ msg, text: 'You are not admin, liar' })
-        return
-      }
-
-      await this.dictionary.updateSource()
-      await this.sendMsg({ msg, text: 'Done' })
-    } catch (e) {
-      await this.processError({ msg, e })
-    }
   }
 
   /* Show all words from dictionary */
@@ -39,7 +24,7 @@ export class BotController extends BotAuth {
       const text = words
         .map(
           ({ word, trans, wordCategory }) =>
-            `${word} - ${trans?.trans} (${wordCategory.categoryName})`,
+            `${word}. translations count: ${trans?.length || 0} (${wordCategory.categoryName})`,
         )
         .join('\n')
       await this.sendMsg({ msg, text: `${words.length} ${text}` })

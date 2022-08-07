@@ -1,58 +1,21 @@
-import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { PrismaClient } from '@prisma/client'
-import { Language, User } from '../../types'
-import { minsToMs } from '../../lib/helpers/mins-to-ms'
+import { InlineKeyboardButton, Message } from 'node-telegram-bot-api'
 import { BaseBotController } from './base-bot-controller'
-import { config } from '../../config'
+import { capitalize } from '../../lib/helpers/capitalize'
+import { Context } from '../../context/types'
+import { UserStorage } from '../../data-source/user-storage/user-storage'
 
 export class BotAuth extends BaseBotController {
-  prisma: PrismaClient
+  /* update commands callback prefixes */
+  public readonly lngUpdate = `${this.name}:lng:`
 
-  private readonly usersMap: Record<number, User>
+  public readonly userStorage: UserStorage
 
-  constructor(bot: TelegramBot, prisma: PrismaClient) {
-    super(bot, prisma)
-    this.prisma = prisma
-    this.usersMap = {}
-  }
+  private readonly ut: Context['ut']
 
-  public async getUserListCount(msg: Message): Promise<void> {
-    await this.sendMsg({ msg, text: `active users: ${Object.keys(this.usersMap)?.length || 0}` })
-  }
-
-  //
-  public async getOrCreateUser(telegramId: User['telegramId']): Promise<User> {
-    if (this.usersMap[telegramId]) {
-      return this.usersMap[telegramId]
-    }
-    const user = await this.prisma.user.upsert({
-      where: {
-        telegramId,
-      },
-      update: {},
-      create: {
-        telegramId,
-        lng: Language.RU,
-        gamesPlayed: 0,
-      },
-    })
-    this.usersMap[user.telegramId] = user as User
-    // eslint-disable-next-line no-console
-    console.log(`set in memory user with id ${telegramId}. Date: ${new Date()}`, this.usersMap[user.telegramId])
-    this.removeUser(telegramId)
-    return user as User
-  }
-
-  public removeUser(userId: number, force = false) {
-    if (force) {
-      delete this.usersMap[userId]
-      return
-    }
-    setTimeout(() => {
-      // eslint-disable-next-line no-console
-      console.log(`remove user with id ${userId} because of AFK. Date: ${new Date()}`, this.usersMap[userId])
-      delete this.usersMap[userId]
-    }, minsToMs(config.auth.timeBeforeAfk))
+  constructor(ctx: Context) {
+    super(ctx)
+    this.userStorage = ctx.userStorage
+    this.ut = ctx.ut
   }
 
   /*
@@ -81,27 +44,43 @@ export class BotAuth extends BaseBotController {
     callback: (msg: Message, match: RegExpExecArray | null) => Promise<any>,
   ): void {
     this.onText(regexp, async (msg, match) => {
-      if (msg.from?.id) {
-        await this.getOrCreateUser(msg.from?.id)
+      if (msg.chat?.id) {
+        await this.userStorage.getOrCreateUser(msg.chat?.id)
       }
       return callback(msg, match)
     })
   }
 
-  // TODO: move somewhere to more related place
-  public async updateUserGamesCount(telegramId: number) {
+
+  public async requestLangUpdate(msg: Message): Promise<void> {
+    const userLocale = await this.userStorage.getUserLocale(msg.chat.id)
+    const options: InlineKeyboardButton[][] = ['en', 'ru'].filter(l => l !== userLocale).map((lng) => [
+      {
+        text: capitalize(lng),
+        callback_data: `${this.lngUpdate}${lng}`,
+      },
+    ]) || []
+
+    const text = await this.ut({key: 'common:updateLng', telegramId: msg.chat.id})
+    await this.sendMsg({
+      msg,
+      text: capitalize(text),
+      options: {
+        reply_markup: {
+          inline_keyboard: options,
+        },
+      },
+    })
+  }
+
+  public async updateUserLanguage(msg: Message, data: string): Promise<void> {
+    const lng = data.split(':').pop() || ''
     try {
-      const user = await this.getOrCreateUser(telegramId)
-      await this.prisma.user.update({
-        where: {
-          telegramId,
-        },
-        data: {
-          gamesPlayed: user.gamesPlayed + 1,
-        },
-      })
+      await this.userStorage.updateUserLng(msg.chat.id, lng)
+      const text = await this.ut({key: 'common:done', telegramId: msg.chat.id})
+      await this.sendMsg({ msg, text })
     } catch (e) {
-      console.error('unable to update gamesPlayed', e)
+      await this.processError({ msg, e })
     }
   }
 }

@@ -1,5 +1,6 @@
 import { LinkedList, ListNode } from '../../../lib/helpers/linked-list'
 import { Dictionary } from '../../dictionary'
+import { TransLanguage } from '../../../types'
 
 export type RandomAnswer = {
   text: string
@@ -15,3 +16,5 @@ export type UserWordListMeta = {
 }
 
 export type VerifyAnswerRes = { isCorrect: boolean; correctAnswer: string }
+
+export type WordListTransWordsMap = Partial<Record<TransLanguage, string[]>>

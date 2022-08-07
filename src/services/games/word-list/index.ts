@@ -1,32 +1,38 @@
-import { PrismaClient } from '@prisma/client'
-import { User } from 'types'
 import { LinkedList, ListNode } from '../../../lib/helpers/linked-list'
 import { capitalize } from '../../../lib/helpers/capitalize'
 import { Dictionary } from '../../dictionary'
-import { PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes } from './types'
+import { PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes, WordListTransWordsMap } from './types'
+import { Language, TransLanguage } from '../../../types'
+import { Context } from '../../../context/types'
+import { UserStorage } from '../../../data-source/user-storage/user-storage'
 
+// todo: move all player related logic to adapter
 export class WordList {
-  dictionary: Dictionary
+  protected readonly dictionary: Dictionary
 
-  translationWords: string[]
+  // used to generate random answers
+  protected translationWords: WordListTransWordsMap
 
-  getUser: (telegramId: User['telegramId']) => Promise<User>
+  protected readonly userStorage: UserStorage
 
   // info
-  name = 'word-list-game'
+  public readonly name = 'word-list-game'
 
-  maxQuizLength = 10
+  protected readonly maxQuizLength = 10
 
-  maxAnswerOptionsLength = 4
+  protected readonly maxAnswerOptionsLength = 4
 
-  constructor(prisma: PrismaClient, getUser: (telegramId: User['telegramId']) => Promise<User>) {
-    this.dictionary = new Dictionary(prisma)
-    this.getUser = getUser
-    this.translationWords = [] // used to generate random answers
+  constructor(ctx: Context) {
+    this.dictionary = new Dictionary(ctx)
+    this.userStorage = ctx.userStorage
+    this.translationWords = {
+      [Language.EN]: [],
+      [Language.RU]: []
+    }
   }
 
   /*
-   * get words and create linked list for future iterations
+   * get words and create a linked list for future iterations
    * */
   public async setWordList(playerId: number, category: string): Promise<ListNode<PlayerDataWord>> {
     const allWords = await this.dictionary.getWords()
@@ -49,8 +55,8 @@ export class WordList {
     if (!node?.next) {
       return null // game is over
     }
-
-    return this.updateNode(playerId, this.composeNodeOptions(node.next))
+    const lng = await this.userStorage.getUserLocale(playerId)
+    return this.updateNode(playerId, this.composeNodeOptions(node.next, lng))
   }
 
   /*
@@ -59,21 +65,28 @@ export class WordList {
   private async prepareAnswerWords() {
     const allWords = await this.dictionary.getWords()
 
-    this.translationWords = allWords
-      .map(({ trans }) => trans?.trans)
-      .sort(() => 0.5 - Math.random())
+    this.translationWords = allWords.reduce<WordListTransWordsMap>((map, {trans}) => {
+      (Object.entries(trans) as  [TransLanguage, string][]).forEach(([lng , value]) => {
+        if (map[lng]) {
+          map[lng]?.push(value)
+        } else {
+          map[lng] = [value]
+        }
+      })
+      return map
+    }, {})
   }
 
   /*
    * populate word node with answers for quiz
    * */
-  private composeNodeOptions(node: ListNode<PlayerDataWord>): ListNode<PlayerDataWord> {
-    if (!node.value.trans?.trans) {
+  private composeNodeOptions(node: ListNode<PlayerDataWord>, lng: TransLanguage): ListNode<PlayerDataWord> {
+    if (!node.value.trans) {
       return node
     }
     // temporary suppress to update linked list node
     // eslint-disable-next-line no-param-reassign
-    node.value.options = this.getOptions(node.value.trans?.trans)
+    node.value.options = this.getOptions(node.value.trans[lng], lng)
     return node
   }
 
@@ -97,8 +110,8 @@ export class WordList {
   /*
    * return shuffled answer options with correct answer
    * */
-  private getOptions(correctAnswer: string): RandomAnswer[] {
-    const shuffled = [...this.translationWords]
+  private getOptions(correctAnswer: string, lng: TransLanguage): RandomAnswer[] {
+    const shuffled = [...(this.translationWords[lng] || [])]
       .sort(() => 0.5 - Math.random())
       .slice(0, this.maxAnswerOptionsLength)
     const withCorrectAnswer = Array.from(new Set([...shuffled, correctAnswer]))
@@ -122,10 +135,10 @@ export class WordList {
     playerId: number,
     list: UserWordListMeta['list'],
   ): Promise<void> {
-    const user = await this.getUser(playerId)
+    const user = await this.userStorage.getOrCreateUser(playerId)
     const userMeta: UserWordListMeta = {
       list,
-      node: this.composeNodeOptions(list.firstNode),
+      node: this.composeNodeOptions(list.firstNode, user.lng.name as TransLanguage),
       score: 0,
     }
     user.meta = {
@@ -138,7 +151,7 @@ export class WordList {
    * create metadata if user was removed from memory because of long afk
    * */
   private async getUserMeta(playerId: number): Promise<Nullable<UserWordListMeta>> {
-    const user = await this.getUser(playerId)
+    const user = await this.userStorage.getOrCreateUser(playerId)
     if (!user.meta?.[this.name]) {
       // await this.setWordList(playerId, '') // fixme: save category somewhere or drop game?
       return null
@@ -147,7 +160,7 @@ export class WordList {
   }
 
   /*
-   * get current step of the game
+   * get a current step of the game
    * */
   private async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
     const userMeta = await this.getUserMeta(playerId)
@@ -155,7 +168,7 @@ export class WordList {
   }
 
   /*
-   * used to set next step of the game
+   * used to set the next step of the game
    * */
   private async updateNode(
     playerId: number,

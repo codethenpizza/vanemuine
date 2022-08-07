@@ -1,25 +1,24 @@
-import { PrismaClient, Translation, Word, WordCategory } from '@prisma/client'
-import { Language } from '../../types'
-import { CategoryNames, DictionaryLoadingState } from './types'
-import { categorySource } from '../../source'
-
-type DictionaryWord = Pick<Word, 'id' | 'word'> & {
-  trans: Pick<Translation, 'trans'>
-  wordCategory: Pick<WordCategory, 'categoryName'>
-}
+import {
+  DictionaryCategory,
+  DictionaryCategoryTrans,
+  DictionaryLoadingState,
+  DictionaryWord,
+} from './types'
+import { Context } from '../../context/types'
+import { TransLanguage } from '../../types'
 
 export class Dictionary {
   loadingState: DictionaryLoadingState
 
-  prisma: PrismaClient
+  prisma: Context['prisma']
 
   words: DictionaryWord[]
 
-  categories: CategoryNames[]
+  categories: DictionaryCategory[]
 
-  constructor(prismaClient: PrismaClient) {
+  constructor({ prisma }: Context) {
     this.loadingState = DictionaryLoadingState.PENDING
-    this.prisma = prismaClient
+    this.prisma = prisma
     this.words = []
     this.categories = []
   }
@@ -28,56 +27,63 @@ export class Dictionary {
     this.loadingState = status
   }
 
-  /*
-   * update words from the source
-   * */
-  public async updateSource(): Promise<void> {
-    // TODO: add bulk create with relations
-    for (const [categoryName, words] of Object.entries(categorySource)) {
-      await this.prisma.wordCategory.create({
-        data: {
-          categoryName,
-          words: {
-            create: words.map(({ word, trans }) => ({
-              word,
-              trans: {
-                create: {
-                  trans,
-                  lang: Language.RU,
-                },
-              },
-            })),
-          },
-        },
-      })
-    }
-  }
-
+  // todo: clean up this
   private async loadSource(): Promise<void> {
     try {
       this.setLoadingStatus(DictionaryLoadingState.LOADING)
-      // todo: make word translation required on db side
-      // @ts-ignore
-      this.words = await this.prisma.word.findMany({
+      const dbWords = await this.prisma.word.findMany({
         select: {
           id: true,
           word: true,
           trans: {
             select: {
               trans: true,
+              lng: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
           wordCategory: {
             select: {
               categoryName: true,
+              wordCategoryTrans: {
+                select: {
+                  name: true,
+                  lng: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
       })
 
-      this.categories = Array.from(
-        new Set(this.words.map(({ wordCategory }) => wordCategory.categoryName)),
-      ) as CategoryNames[]
+      this.words = dbWords.map(({ trans, wordCategory, ...rest }) => ({
+        ...rest,
+        trans: trans.reduce((map, { trans: wordTrans, lng }) => {
+          // @ts-ignore
+          map[lng.name] = wordTrans
+          return map
+        }, {}),
+        wordCategory: {
+          categoryName: wordCategory.categoryName,
+          trans: wordCategory.wordCategoryTrans.reduce<DictionaryCategoryTrans>((map, { lng, name }) => {
+            const lngName = lng?.name
+            if (lngName) {
+              // @ts-ignore
+              map[lngName as TransLanguage] = name
+            }
+            return map
+          }, {}),
+        }
+      }))
+
+      this.updateCategories()
       this.setLoadingStatus(DictionaryLoadingState.PENDING)
     } catch (e) {
       console.error(e)
@@ -85,11 +91,24 @@ export class Dictionary {
     }
   }
 
- /*
- * return array of CategoryNames or try to load them
- * */
-  public async getCategories(force = false): Promise<CategoryNames[]> {
-    if (this.categories.length && !force) {
+  /*
+  * update local categories after word update
+  * */
+  private updateCategories(): void {
+    const uniqueCatsMap = this.words.map(({wordCategory}) => wordCategory).reduce<Record<string, any>>((map, cat) => {
+      map[cat.categoryName] = cat
+      return map
+    }, {})
+    this.categories = Object.values(uniqueCatsMap)
+  }
+
+
+  /*
+  * return array of CategoryNames or try to load them
+  * */
+  public async getCategories(force = false): Promise<DictionaryCategory[]> {
+    if (this.categories.length && !force
+    ) {
       return this.categories
     }
     await this.loadSource()
@@ -107,7 +126,5 @@ export class Dictionary {
     return this.words
   }
 
-  public getCategoryNames(): string[] {
-    return this.categories
-  }
+  public getCategoryNames = (): DictionaryCategory[] => this.categories
 }

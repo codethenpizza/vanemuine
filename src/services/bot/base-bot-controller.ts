@@ -1,7 +1,7 @@
 import TelegramBot, { Message, SendMessageOptions } from 'node-telegram-bot-api'
-import { PrismaClient } from '@prisma/client'
 import { Dictionary } from '../dictionary'
 import { config } from '../../config'
+import { Context } from '../../context/types'
 
 export type SendMsgArgs = {
   msg: Message
@@ -15,16 +15,19 @@ export type ProcessErrorArgs = {
   e?: any // error e.g. from catch
 }
 
+
 export class BaseBotController {
   bot: TelegramBot
 
   dictionary: Dictionary
 
-  errorMsgTemplate = 'something went wrong'
+  protected readonly name = 'bot' // used for callback queries prefix
 
-  constructor(bot: TelegramBot, prisma: PrismaClient) {
-    this.bot = bot
-    this.dictionary = new Dictionary(prisma)
+  protected readonly errorMsgTemplate = 'something went wrong'
+
+  constructor(ctx: Context) {
+    this.bot = ctx.bot
+    this.dictionary = new Dictionary(ctx)
   }
 
   protected static isAdmin(msg: Optional<number>): boolean {

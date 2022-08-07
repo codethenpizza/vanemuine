@@ -30,7 +30,14 @@
     "consistent-return": "warn",
     // correct enum parse
     "no-shadow": "off",
-    "@typescript-eslint/no-shadow": "error"
+    "@typescript-eslint/no-shadow": "error",
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": ["map"]
+      }
+    ]
   },
   "settings": {
     "import/parsers": {

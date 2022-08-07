@@ -1,0 +1,23 @@
+{
+  "errors": {
+    "generic": "oops"
+  },
+  "common": {
+    "greeting": "Hi!",
+    "betaNote": "(this still beta, if you will get an errors please type /log so I can fix that)",
+    "log": "Data logged for your id",
+    "updateLng": "Please pick your language",
+    "done": "Done!"
+  },
+  "commands": {
+    "listDesk": "type /list to start the quiz",
+    "lngUpdate": "type /lng to update bit language"
+  },
+  "quiz": {
+    "pickCategory": "Please, pick category",
+    "random": "Random",
+    "correct": "That's correct, {{correctAnswer}} - right answer!",
+    "incorrect": "Ouch, {{answer}} that's not correct. Right Answer: {{correctAnswer}}",
+    "endgame": "That's all :C Thank you for playing! \\nScore: {{score}}"
+  }
+}

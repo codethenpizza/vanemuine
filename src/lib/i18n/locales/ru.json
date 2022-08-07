@@ -1,0 +1,24 @@
+{
+  "errors": {
+    "generic": "Упс"
+  },
+  "common": {
+    "greeting": "Привет!",
+    "betaNote": "(this still beta, if you will get an errors please type /log so I can fix that)",
+    "log": "Data logged for your id",
+    "updateLng": "Пожалуйста укажите ваш язык",
+    "done": "Готово!"
+  },
+  "commands": {
+    "listDesk": "Type /list to start the quiz",
+    "lngUpdate": "Type /lng to update bit language"
+  },
+  "quiz": {
+    "pickCategory": "Теперь нужно выбрать категорию",
+    "random": "Случайная категория",
+    "correct": "That's correct, {{correctAnswer}} - right answer!",
+    "incorrect": "Ouch, {{answer}} that's not correct. Right Answer: {{correctAnswer}}",
+    "endgame": "That's all :C Thank you for playing! \\nScore: {{score}}"
+
+  }
+}
