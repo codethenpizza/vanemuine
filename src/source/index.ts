@@ -32,13 +32,12 @@ export const CategoryFriendlyNamesRu: Record<CategoryNames, string> = {
   * */
 }
 
-export const getCategoryTranslations = (): CategorySourceMap => (Object.values(CategoryNames) as CategoryNames[]).reduce<CategorySourceMap>((m, cat) => {
-  // eslint-disable-next-line no-param-reassign
-  m[cat] = [
+export const getCategoryTranslations = (): CategorySourceMap => (Object.values(CategoryNames) as CategoryNames[]).reduce<CategorySourceMap>((map, cat) => {
+  map[cat] = [
     { lng: Language.EN, name: CategoryFriendlyNamesEn[cat] },
     { lng: Language.RU, name: CategoryFriendlyNamesRu[cat] },
   ]
-  return m
+  return map
 }, {})
 
 export const wordsSource: WordsSourceMap = {
@@ -51,7 +50,7 @@ export const wordsSource: WordsSourceMap = {
           lng: Language.EN,
         },
         {
-          tword: 'thank',
+          tword: 'спасибо',
           lng: Language.RU,
         },
       ],
@@ -63,7 +62,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'please',
           lng: Language.EN,
         }, {
-          tword: 'please',
+          tword: 'пожалуйста',
           lng: Language.RU,
         },
       ],
@@ -75,7 +74,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'hello',
           lng: Language.EN,
         }, {
-          tword: 'hello',
+          tword: 'привет',
           lng: Language.RU,
         },
       ],
@@ -87,7 +86,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'how are you?',
           lng: Language.EN,
         }, {
-          tword: 'how are you?',
+          tword: 'как дела?',
           lng: Language.RU,
         },
       ],
@@ -99,7 +98,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'well',
           lng: Language.EN,
         }, {
-          tword: 'well',
+          tword: 'хорошо',
           lng: Language.RU,
         },
       ],
@@ -111,7 +110,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'so',
           lng: Language.EN,
         }, {
-          tword: 'so',
+          tword: 'так',
           lng: Language.RU,
         },
       ],
@@ -123,7 +122,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'see',
           lng: Language.EN,
         }, {
-          tword: 'see',
+          tword: 'смотреть',
           lng: Language.RU,
         },
 
@@ -136,7 +135,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'no',
           lng: Language.EN,
         }, {
-          tword: 'no',
+          tword: 'нет',
           lng: Language.RU,
         },
 
@@ -149,7 +148,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'yes',
           lng: Language.EN,
         }, {
-          tword: 'yes',
+          tword: 'да',
           lng: Language.RU,
         },
 
@@ -162,7 +161,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'perhaps',
           lng: Language.EN,
         }, {
-          tword: 'perhaps',
+          tword: 'может быть',
           lng: Language.RU,
         },
 
@@ -175,7 +174,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'open',
           lng: Language.EN,
         }, {
-          tword: 'open',
+          tword: 'открытый',
           lng: Language.RU,
         },
 
@@ -188,7 +187,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'music',
           lng: Language.EN,
         }, {
-          tword: 'music',
+          tword: 'музыка',
           lng: Language.RU,
         },
 
@@ -201,7 +200,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'hot',
           lng: Language.EN,
         }, {
-          tword: 'hot',
+          tword: 'горячее',
           lng: Language.RU,
         },
 
@@ -214,7 +213,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'cold',
           lng: Language.EN,
         }, {
-          tword: 'cold',
+          tword: 'холод',
           lng: Language.RU,
         },
 
@@ -227,7 +226,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'danger',
           lng: Language.EN,
         }, {
-          tword: 'danger',
+          tword: 'опасность',
           lng: Language.RU,
         },
 
@@ -242,7 +241,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'honey',
           lng: Language.EN,
         }, {
-          tword: 'honey',
+          tword: 'мед',
           lng: Language.RU,
         },
       ],
@@ -254,7 +253,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'bread',
           lng: Language.EN,
         }, {
-          tword: 'bread',
+          tword: 'хлеб',
           lng: Language.RU,
         },
       ],
@@ -266,7 +265,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'chicken',
           lng: Language.EN,
         }, {
-          tword: 'chicken',
+          tword: 'курица',
           lng: Language.RU,
         },
       ],
@@ -278,7 +277,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'beef',
           lng: Language.EN,
         }, {
-          tword: 'beef',
+          tword: 'говядина',
           lng: Language.RU,
         },
       ],
@@ -290,7 +289,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'pork',
           lng: Language.EN,
         }, {
-          tword: 'pork',
+          tword: 'свинина',
           lng: Language.RU,
         },
       ],
@@ -302,7 +301,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'sausage',
           lng: Language.EN,
         }, {
-          tword: 'sausage',
+          tword: 'колбаса',
           lng: Language.RU,
         },
       ],
@@ -314,7 +313,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'fish',
           lng: Language.EN,
         }, {
-          tword: 'fish',
+          tword: 'рыба',
           lng: Language.RU,
         },
       ],
@@ -326,7 +325,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'milk',
           lng: Language.EN,
         }, {
-          tword: 'milk',
+          tword: 'молоко',
           lng: Language.RU,
         },
       ],
@@ -338,7 +337,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'sugar',
           lng: Language.EN,
         }, {
-          tword: 'sugar',
+          tword: 'сахар',
           lng: Language.RU,
         },
       ],
@@ -350,7 +349,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'salt',
           lng: Language.EN,
         }, {
-          tword: 'salt',
+          tword: 'соль',
           lng: Language.RU,
         },
       ],
@@ -364,7 +363,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'animal',
           lng: Language.EN,
         }, {
-          tword: 'animal',
+          tword: 'животные',
           lng: Language.RU,
         },
       ],
@@ -376,7 +375,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'cat',
           lng: Language.EN,
         }, {
-          tword: 'cat',
+          tword: 'кошка',
           lng: Language.RU,
         },
       ],
@@ -388,7 +387,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'dog',
           lng: Language.EN,
         }, {
-          tword: 'dog',
+          tword: 'собака',
           lng: Language.RU,
         },
       ],
@@ -400,7 +399,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'horse',
           lng: Language.EN,
         }, {
-          tword: 'horse',
+          tword: 'конь',
           lng: Language.RU,
         },
       ],
@@ -412,7 +411,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'rat',
           lng: Language.EN,
         }, {
-          tword: 'rat',
+          tword: 'крыса',
           lng: Language.RU,
         },
       ],
@@ -424,19 +423,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'deer',
           lng: Language.EN,
         }, {
-          tword: 'deer',
-          lng: Language.RU,
-        },
-      ],
-    },
-    {
-      word: 'hirved',
-      trans: [
-        {
-          tword: 'deer',
-          lng: Language.EN,
-        }, {
-          tword: 'deer',
+          tword: 'олень',
           lng: Language.RU,
         },
       ],
@@ -448,7 +435,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'ferret',
           lng: Language.EN,
         }, {
-          tword: 'ferret',
+          tword: 'хорек',
           lng: Language.RU,
         },
       ],
@@ -460,7 +447,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'parrot',
           lng: Language.EN,
         }, {
-          tword: 'parrot',
+          tword: 'попугай',
           lng: Language.RU,
         },
       ],
@@ -472,7 +459,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'rabbit',
           lng: Language.EN,
         }, {
-          tword: 'rabbit',
+          tword: 'кролик',
           lng: Language.RU,
         },
       ],
@@ -484,7 +471,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'turtle',
           lng: Language.EN,
         }, {
-          tword: 'turtle',
+          tword: 'черепаха',
           lng: Language.RU,
         },
       ],
@@ -496,7 +483,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'spider',
           lng: Language.EN,
         }, {
-          tword: 'spider',
+          tword: 'паук',
           lng: Language.RU,
         },
       ],
@@ -508,7 +495,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'snake',
           lng: Language.EN,
         }, {
-          tword: 'snake',
+          tword: 'змея',
           lng: Language.RU,
         },
       ],
@@ -522,7 +509,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'monday',
           lng: Language.EN,
         }, {
-          tword: 'monday',
+          tword: 'понедельник',
           lng: Language.RU,
         },
       ],
@@ -534,7 +521,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'tuesday',
           lng: Language.EN,
         }, {
-          tword: 'tuesday',
+          tword: 'вторник',
           lng: Language.RU,
         },
       ],
@@ -543,10 +530,10 @@ export const wordsSource: WordsSourceMap = {
       word: 'kolmapäev',
       trans: [
         {
-          tword: 'Wednesday',
+          tword: 'wednesday',
           lng: Language.EN,
         }, {
-          tword: 'Wednesday',
+          tword: 'среда',
           lng: Language.RU,
         },
       ],
@@ -558,7 +545,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'thursday',
           lng: Language.EN,
         }, {
-          tword: 'thursday',
+          tword: 'четверг',
           lng: Language.RU,
         },
       ],
@@ -570,7 +557,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'friday',
           lng: Language.EN,
         }, {
-          tword: 'friday',
+          tword: 'пятница',
           lng: Language.RU,
         },
       ],
@@ -582,7 +569,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'saturday',
           lng: Language.EN,
         }, {
-          tword: 'saturday',
+          tword: 'cуббота',
           lng: Language.RU,
         },
       ],
@@ -594,7 +581,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'sunday',
           lng: Language.EN,
         }, {
-          tword: 'sunday',
+          tword: 'воскресенье',
           lng: Language.RU,
         },
       ],
@@ -606,7 +593,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'week',
           lng: Language.EN,
         }, {
-          tword: 'week',
+          tword: 'неделя',
           lng: Language.RU,
         },
       ],
@@ -618,7 +605,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'weekend',
           lng: Language.EN,
         }, {
-          tword: 'weekend',
+          tword: 'выходные',
           lng: Language.RU,
         },
       ],
@@ -630,7 +617,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'weekdays',
           lng: Language.EN,
         }, {
-          tword: 'weekdays',
+          tword: 'будни',
           lng: Language.RU,
         },
       ],
@@ -644,7 +631,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'january',
           lng: Language.EN,
         }, {
-          tword: 'january',
+          tword: 'январь',
           lng: Language.RU,
         },
       ],
@@ -656,7 +643,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'february',
           lng: Language.EN,
         }, {
-          tword: 'february',
+          tword: 'февраль',
           lng: Language.RU,
         },
       ],
@@ -668,7 +655,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'march',
           lng: Language.EN,
         }, {
-          tword: 'march',
+          tword: 'март',
           lng: Language.RU,
         },
       ],
@@ -680,7 +667,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'april',
           lng: Language.EN,
         }, {
-          tword: 'april',
+          tword: 'апрель',
           lng: Language.RU,
         },
       ],
@@ -692,7 +679,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'may',
           lng: Language.EN,
         }, {
-          tword: 'may',
+          tword: 'май',
           lng: Language.RU,
         },
       ],
@@ -704,7 +691,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'june',
           lng: Language.EN,
         }, {
-          tword: 'june',
+          tword: 'июнь',
           lng: Language.RU,
         },
       ],
@@ -716,7 +703,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'july',
           lng: Language.EN,
         }, {
-          tword: 'july',
+          tword: 'июль',
           lng: Language.RU,
         },
       ],
@@ -728,7 +715,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'august',
           lng: Language.EN,
         }, {
-          tword: 'august',
+          tword: 'август',
           lng: Language.RU,
         },
       ],
@@ -740,7 +727,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'september',
           lng: Language.EN,
         }, {
-          tword: 'september',
+          tword: 'сентябрь',
           lng: Language.RU,
         },
       ],
@@ -752,7 +739,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'october',
           lng: Language.EN,
         }, {
-          tword: 'october',
+          tword: 'октябрь',
           lng: Language.RU,
         },
       ],
@@ -764,7 +751,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'november',
           lng: Language.EN,
         }, {
-          tword: 'november',
+          tword: 'ноябрь',
           lng: Language.RU,
         },
       ],
@@ -776,7 +763,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'december',
           lng: Language.EN,
         }, {
-          tword: 'december',
+          tword: 'декабрь',
           lng: Language.RU,
         },
       ],
@@ -788,7 +775,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'month',
           lng: Language.EN,
         }, {
-          tword: 'month',
+          tword: 'месяц',
           lng: Language.RU,
         },
       ],
@@ -802,7 +789,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'i',
           lng: Language.EN,
         }, {
-          tword: 'i',
+          tword: 'я',
           lng: Language.RU,
         },
       ],
@@ -814,7 +801,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'you (singular)',
           lng: Language.EN,
         }, {
-          tword: 'you (singular)',
+          tword: 'ты',
           lng: Language.RU,
         },
       ],
@@ -826,7 +813,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'he/she',
           lng: Language.EN,
         }, {
-          tword: 'he/she',
+          tword: 'он/она',
           lng: Language.RU,
         },
       ],
@@ -838,7 +825,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'we',
           lng: Language.EN,
         }, {
-          tword: 'we',
+          tword: 'мы',
           lng: Language.RU,
         },
       ],
@@ -850,7 +837,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'you (plural)',
           lng: Language.EN,
         }, {
-          tword: 'you (plural)',
+          tword: 'вы',
           lng: Language.RU,
         },
       ],
@@ -862,7 +849,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'they',
           lng: Language.EN,
         }, {
-          tword: 'they',
+          tword: 'они',
           lng: Language.RU,
         },
       ],
@@ -876,7 +863,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'how?',
           lng: Language.EN,
         }, {
-          tword: 'how?',
+          tword: 'как?',
           lng: Language.RU,
         },
       ],
@@ -888,7 +875,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'what?',
           lng: Language.EN,
         }, {
-          tword: 'what?',
+          tword: 'что?',
           lng: Language.RU,
         },
       ],
@@ -900,7 +887,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'who?',
           lng: Language.EN,
         }, {
-          tword: 'who?',
+          tword: 'кто?',
           lng: Language.RU,
         },
       ],
@@ -912,7 +899,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'why?',
           lng: Language.EN,
         }, {
-          tword: 'why?',
+          tword: 'почему?',
           lng: Language.RU,
         },
       ],
@@ -924,7 +911,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'where?',
           lng: Language.EN,
         }, {
-          tword: 'where?',
+          tword: 'где?',
           lng: Language.RU,
         },
       ],
