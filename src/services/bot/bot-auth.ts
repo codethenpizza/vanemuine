@@ -2,13 +2,12 @@ import { InlineKeyboardButton, Message } from 'node-telegram-bot-api'
 import { BaseBotController } from './base-bot-controller'
 import { capitalize } from '../../lib/helpers/capitalize'
 import { Context } from '../../context/types'
-import { UserStorage } from '../../data-source/user-storage/user-storage'
 
 export class BotAuth extends BaseBotController {
   /* update commands callback prefixes */
   public readonly lngUpdate = `${this.name}:lng:`
 
-  public readonly userStorage: UserStorage
+  public readonly userStorage: Context['userStorage']
 
   private readonly ut: Context['ut']
 

@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api'
-import { config } from '../../config'
+import { config } from '../../../config'
 
 const { url, port, token } = config.bot
 

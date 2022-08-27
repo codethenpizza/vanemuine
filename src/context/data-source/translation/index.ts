@@ -1,6 +1,6 @@
-import { UserStorage } from '../user-storage/user-storage'
-import { UTArgs } from '../../services/bot/types'
-import { t } from '../../lib/i18n'
+import { UserStorage } from "../user-storage"
+import { UTArgs } from '../../../services/bot/types'
+import { t } from '../../../lib/i18n'
 
 export class Translation {
   private readonly userStorage: UserStorage

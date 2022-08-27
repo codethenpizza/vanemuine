@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { Language, TelegramId, TransLanguage, User } from '../../types'
-import { minsToMs } from '../../lib/helpers/mins-to-ms'
-import { config } from '../../config'
+import { Language, TelegramId, TransLanguage, User } from '../../../types'
+import { minsToMs } from '../../../lib/helpers/mins-to-ms'
+import { config } from '../../../config'
 
 export class UserStorage {
   /*

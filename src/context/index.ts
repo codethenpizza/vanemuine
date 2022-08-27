@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { Context } from './types'
-import { UserStorage } from '../data-source/user-storage/user-storage'
-import { Translation } from '../data-source/translation/translation'
-import { initBot } from '../data-source/telegram-bot/telegram-bot'
+import { UserStorage, Translation, initBot } from "./data-source"
 import { config } from '../config'
 
 export const createContext = async (): Promise<Context> => {

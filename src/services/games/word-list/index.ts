@@ -4,7 +4,6 @@ import { Dictionary } from '../../dictionary'
 import { PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes, WordListTransWordsMap } from './types'
 import { Language, TransLanguage } from '../../../types'
 import { Context } from '../../../context/types'
-import { UserStorage } from '../../../data-source/user-storage/user-storage'
 
 // todo: move all player related logic to adapter
 export class WordList {
@@ -13,7 +12,7 @@ export class WordList {
   // used to generate random answers
   protected translationWords: WordListTransWordsMap
 
-  protected readonly userStorage: UserStorage
+  protected readonly userStorage: Context['userStorage']
 
   // info
   public readonly name = 'word-list-game'
