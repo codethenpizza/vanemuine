@@ -13,7 +13,7 @@ export const createContext = async (): Promise<Context> => {
     bot,
     config,
     prisma,
-    userStorage: new UserStorage(prisma),
+    userStorage,
     ut: translation.ut
   }
 }
