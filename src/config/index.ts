@@ -12,6 +12,10 @@ export const config: Config = {
     adminId: numberFromEnv(process.env.ADMIN_TELEGRAM_ID),
   },
   auth: {
-    userInMemoryLifeTime: 300
+    userInMemoryLifeTimeMinutes: 300
+  },
+  quiz: {
+    maxQuizLength: 8,
+    maxAnswerOptionsLength: 4
   }
 }

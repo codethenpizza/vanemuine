@@ -9,6 +9,10 @@ export type Config = {
     adminId: number
   }
   auth: {
-    userInMemoryLifeTime: number
+    userInMemoryLifeTimeMinutes: number
+  }
+  quiz: {
+    maxQuizLength: number
+    maxAnswerOptionsLength: number
   }
 }

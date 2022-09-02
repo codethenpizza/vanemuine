@@ -4,8 +4,10 @@ import { Dictionary } from '../../dictionary'
 import { PlayerDataWord, RandomAnswer, UserWordListMeta, VerifyAnswerRes, WordListTransWordsMap } from './types'
 import { Language, TransLanguage } from '../../../types'
 import { Context } from '../../../context/types'
+import { config } from '../../../config'
 
 // todo: move all player related logic to adapter
+const {maxAnswerOptionsLength, maxQuizLength} = config.quiz
 export class WordList {
   protected readonly dictionary: Dictionary
 
@@ -17,9 +19,9 @@ export class WordList {
   // info
   public readonly name = 'word-list-game'
 
-  protected readonly maxQuizLength = 8
+  protected readonly maxQuizLength = maxQuizLength
 
-  protected readonly maxAnswerOptionsLength = 4
+  protected readonly maxAnswerOptionsLength = maxAnswerOptionsLength
 
   constructor(ctx: Context) {
     this.dictionary = new Dictionary(ctx)

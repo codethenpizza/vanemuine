@@ -13,7 +13,7 @@ export class UserStorage {
   /*
   * the amount of minute user should be kept in the memory
   * */
-  private readonly userInMemoryLifeTime = config.auth.userInMemoryLifeTime
+  private readonly userInMemoryLifeTimeMinutes = config.auth.userInMemoryLifeTimeMinutes
 
   /*
   * keeps user in memory for N minutes
@@ -75,7 +75,7 @@ export class UserStorage {
   }
 
   /*
-  * remove user from memory after "userInMemoryLifeTime" minutes
+  * remove user from memory after "userInMemoryLifeTimeMinutes"
   * */
   private removeUserFromMemory = (telegramId: TelegramId, force?: boolean): void => {
     if (force) {
@@ -86,7 +86,7 @@ export class UserStorage {
       // eslint-disable-next-line no-console
       console.log(`remove user with id ${telegramId} because of AFK. Date: ${new Date()}`, this.usersMap.get(telegramId))
       this.usersMap.delete(telegramId)
-    }, minsToMs(this.userInMemoryLifeTime))
+    }, minsToMs(this.userInMemoryLifeTimeMinutes))
   }
 
   /*
