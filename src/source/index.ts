@@ -174,7 +174,7 @@ export const wordsSource: WordsSourceMap = {
           tword: 'open',
           lng: Language.EN,
         }, {
-          tword: 'открытый',
+          tword: 'открыто',
           lng: Language.RU,
         },
 
