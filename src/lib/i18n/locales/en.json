@@ -18,6 +18,9 @@
     "random": "Random",
     "correct": "That's correct, {{correctAnswer}} - right answer!",
     "incorrect": "Ouch, {{answer}} that's not correct. Right Answer: {{correctAnswer}}",
-    "endgame": "That's all :C Thank you for playing! \\nScore: {{score}}"
+    "endgame": "That's all :C",
+    "thanks": "Thank you for playing!",
+    "score": "Score: {{get}} / {{from}}",
+    "timout": "Looks like game was dropped because of long timout :C'"
   }
 }

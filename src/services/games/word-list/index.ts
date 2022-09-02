@@ -17,7 +17,7 @@ export class WordList {
   // info
   public readonly name = 'word-list-game'
 
-  protected readonly maxQuizLength = 10
+  protected readonly maxQuizLength = 8
 
   protected readonly maxAnswerOptionsLength = 4
 
@@ -49,8 +49,8 @@ export class WordList {
   /*
    * set next step and return it
    * */
-  public async getNext(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
-    const node = (await this.getNode(playerId)) || null
+  public async setNext(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
+    const node = await this.getNode(playerId)
     if (!node?.next) {
       return null // game is over
     }
@@ -161,7 +161,7 @@ export class WordList {
   /*
    * get a current step of the game
    * */
-  private async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
+  protected async getNode(playerId: number): Promise<Nullable<ListNode<PlayerDataWord>>> {
     const userMeta = await this.getUserMeta(playerId)
     return userMeta?.node || null
   }
@@ -184,13 +184,13 @@ export class WordList {
   /*
    * get a user score of current game
    * */
-  public async getScore(playerId: number): Promise<string> {
+  public async getScore(playerId: number): Promise<[number, number]> {
     const userMeta = await this.getUserMeta(playerId)
 
     if (!userMeta) {
-      return `looks like game was dropped because of long timout :C`
+      throw new Error(`user meta timout error`)
     }
-    return `${userMeta?.score} / ${userMeta?.list.length}`
+    return [userMeta?.score, userMeta?.list.length]
   }
 
   /*

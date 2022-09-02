@@ -6,6 +6,7 @@ import { WordList } from './index'
 import { UserWordListMeta } from './types'
 import { Context } from '../../../context/types'
 
+// TODO: move game messages to another class
 export class WordListBotAdapter extends WordList {
   onGameEnd: (playerId: number) => Promise<void>
 
@@ -57,7 +58,6 @@ export class WordListBotAdapter extends WordList {
       await this.getFirstStep(playerId, category, msg)
       return
     }
-
     await this.processAnswer(playerId, msg, data)
     await this.getGameNextStep(playerId, msg)
   }
@@ -66,20 +66,20 @@ export class WordListBotAdapter extends WordList {
   private async getCategories(telegramId: TelegramId): Promise<Omit<SendMsgArgs, 'msg'>> {
     const categories = await this.dictionary.getCategories()
     const lng = await this.userStorage.getUserLocale(telegramId)
-    const options: InlineKeyboardButton[][] = categories?.map(({categoryName, trans}) => [
+    const options: InlineKeyboardButton[][] = categories?.map(({ categoryName, trans }) => [
       {
         text: trans[lng] || '',
         callback_data: `${this.name}:cat:${categoryName}`,
       },
     ]) || []
 
-    const randomCatName = await this.ut({key: 'quiz:random', telegramId })
+    const randomCatName = await this.ut({ key: 'quiz:random', telegramId })
     options.push([{
       text: randomCatName,
       callback_data: `${this.name}:cat:`,
     }])
 
-    const text = capitalize(await this.ut({key: 'quiz:pickCategory', telegramId }))
+    const text = capitalize(await this.ut({ key: 'quiz:pickCategory', telegramId }))
 
     return {
       text,
@@ -98,7 +98,7 @@ export class WordListBotAdapter extends WordList {
   }
 
   private async getGameNextStep(playerId: number, msg: Message): Promise<void> {
-    const node = await this.getNext(playerId)
+    const node = await this.setNext(playerId)
     const nextStep = await this.composeResponse(node, playerId)
     await this.sendMsg({ msg, ...nextStep })
   }
@@ -115,18 +115,26 @@ export class WordListBotAdapter extends WordList {
   }
 
   private async getCorrectMsgTemplate(telegramId: TelegramId, correctAnswer?: string): Promise<string> {
-    const msg = await this.ut({key: 'quiz:correct',options: { correctAnswer }, telegramId})
+    const msg = await this.ut({ key: 'quiz:correct', options: { correctAnswer }, telegramId })
     return `✅ ${msg}`
   }
 
   private async getIncorrectMsgTemplate(telegramId: TelegramId, correctAnswer: string, answer?: string): Promise<string> {
-    const msg = await this.ut({key: 'quiz:incorrect',options: { correctAnswer, answer }, telegramId})
+    const msg = await this.ut({ key: 'quiz:incorrect', options: { correctAnswer, answer }, telegramId })
     return `🌚 ${msg}`
   }
 
-  private async getEndMsgTemplate(telegramId: TelegramId, score: string): Promise<string> {
-    const msg = await this.ut({key: 'quiz:incorrect', options: { score }, telegramId})
-    return `${msg}`
+  private async getEndMsgTemplate(telegramId: TelegramId): Promise<string> {
+    try {
+      const [get, from] = await this.getScore(telegramId)
+      let msg: string = await this.ut({ key: 'quiz:endgame', telegramId })
+      msg = `${msg}\n${await this.ut({ key: 'quiz:thanks', telegramId })}`
+      msg = `${msg}\n${await this.ut({ key: 'quiz:score', options: { get, from }, telegramId })}`
+
+      return `${msg}`
+    } catch (e) {
+      return this.ut({ key: 'quiz:timout', telegramId })
+    }
   }
 
   private async composeResponse(
@@ -134,14 +142,12 @@ export class WordListBotAdapter extends WordList {
     telegramId: TelegramId,
   ): Promise<Omit<SendMsgArgs, 'msg'>> {
     if (!node) {
-      const score = await this.getScore(telegramId)
-
       // ignore this promise because it's only gather analytics and not necessary
       // TODO: move somewhere so user can get score before analytics update
       await this.onGameEnd(telegramId)
 
       return {
-        text: await this.getEndMsgTemplate(telegramId, score),
+        text: await this.getEndMsgTemplate(telegramId),
       }
     }
 
@@ -180,9 +186,9 @@ export class WordListBotAdapter extends WordList {
 
     const user = await this.userStorage.getOrCreateUser(playerId)
     // eslint-disable-next-line no-console
-    console.log('logPlayerData', JSON.stringify({from: msg, user} || {}, undefined, 2))
+    console.log('logPlayerData', JSON.stringify({ from: msg, user } || {}, undefined, 2))
     // I know, I know, but this is for users fun
     const text = `(ﾉ◕ヮ◕)ﾉ*:･ﾟ Data logged for your id: ${playerId}`
-    await this.sendMsg({msg, text})
+    await this.sendMsg({ msg, text })
   }
 }
